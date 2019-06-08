@@ -80,9 +80,9 @@ for i in range(test_count):
     config['output'] = '../emb/lesmis' + str(i + 1) + '.emb'
     res.append(test(config, node2vec_ms))
 
-for i in range(test_count, 2 * test_count):
-    config['output'] = '../emb/lesmis' + str(i + 1) + '.emb'
-    res.append(test(config, node2vec_revers))
+# for i in range(test_count, 2 * test_count):
+#     config['output'] = '../emb/lesmis' + str(i + 1) + '.emb'
+#     res.append(test(config, node2vec_revers))
 
 for i in range(2 * test_count, 3 * test_count):
     config['output'] = '../emb/lesmis' + str(i + 1) + '.emb'

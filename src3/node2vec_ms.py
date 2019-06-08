@@ -44,17 +44,17 @@ class Graph():
             updated_walks = []
             for walk_tuple in walk_list:
                 next_step = random.choice(list(drawn[prev].keys()))
-                updated_walks.append((walk_tuple[0] + (next_step,), walk_tuple[1]))
+                updated_walks.append(walk_tuple + (next_step,))
                 drawn[prev][next_step] = drawn[prev][next_step] - 1
                 if not drawn[prev][next_step]:
                     del drawn[prev][next_step]
-            if len(updated_walks[0][0]) == walk_length:
-                walks += [list(w[0]) for w in updated_walks]
+            if len(updated_walks[0]) == walk_length:
+                walks += [list(w) for w in updated_walks]
             else:
                 visit.add(tuple(updated_walks))
 
     def get_prev(self, walk):
-        return walk[0][-2] if len(walk[0]) > 1 else -1
+        return walk[-2] if len(walk) > 1 else -1
 
     def node2vec_walk(self, walk_length, start_nodes, num_walks):
         '''
@@ -65,13 +65,12 @@ class Graph():
         visit = set()
         visitNext = set()
         for i, start_node in enumerate(start_nodes):
-            visit.add(tuple(((start_node,), i) for _ in range(num_walks)))
+            visit.add(tuple((start_node,) for _ in range(num_walks)))
         while visit:
             while visit:
                 cur_list = visit.pop()  # Tuple containing all identical walks
                 cur_walk = cur_list[0]  # Single walk to act as a representative of whole progress so far
-                cur_id = cur_walk[1]  # Id of the random walk
-                cur = cur_walk[0][-1]  # The last node of the currently considered walk
+                cur = cur_walk[-1]  # The last node of the currently considered walk
                 drop_set = set()
                 drop_set.add(cur_list)  # Walks that should be removed from visit as they are processed now
                 # dict with number of steps and previous node (if it's not the first iteration) per walk id
@@ -79,15 +78,13 @@ class Graph():
                 next_steps_len = {self.get_prev(cur_walk): len(cur_list)}
                 for walk_list in visit:
                     cur_walk_overlap = walk_list[0]
-                    if cur_walk_overlap[0][-1] == cur:
+                    if cur_walk_overlap[-1] == cur:
                         drop_set.add(walk_list)
                         next_steps_len[self.get_prev(cur_walk_overlap)] = next_steps_len.get(
                             self.get_prev(cur_walk_overlap), 0) + len(walk_list)
-                        # next_steps_len[walk_list[0][1]] = (
-                        #     len(walk_list), cur_walk_overlap[0][-2] if len(cur_walk[0]) > 1 else -1)
                 cur_nbrs = sorted(G.neighbors(cur))
                 if len(cur_nbrs) > 0:
-                    if len(cur_walk[0]) == 1:
+                    if len(cur_walk) == 1:
                         drawn = self.draw_node(cur, next_steps_len, cur_nbrs)
                         self.update_step(drawn, drop_set, walk_length, walks, visitNext)
                     else:
@@ -112,7 +109,7 @@ class Graph():
         #     print str(walk_iter + 1), '/', str(num_walks)
         random.shuffle(nodes)
         # for node in nodes:
-        for node_chunk in self.chunker(nodes, 1):
+        for node_chunk in self.chunker(nodes, 16):
             walks += self.node2vec_walk(walk_length=walk_length, start_nodes=list(node_chunk), num_walks=num_walks)
 
         return walks
