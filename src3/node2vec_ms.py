@@ -20,30 +20,85 @@ class Graph():
                 return
             yield chain((first,), chunk)
 
+    # # @profile
+    # def draw_node(self, node, next_steps_len, node_neighbors):
+    #     result = {}
+    #     for k, v in next_steps_len.items():
+    #         result[k] = []
+    #         for i in range(v):
+    #             n1 = self.alias_nodes[node][0]
+    #             n2 = self.alias_nodes[node][1]
+    #             alias = alias_draw(n1, n2)
+    #             next = node_neighbors[alias]  # RANDOM ACCESS!
+    #             result[k].append(next)
+    #     return result
+    #
+    # # @profile
+    # def draw_edge(self, node, next_steps_len, node_neighbors):
+    #     result = {}
+    #     for k, v in next_steps_len.items():
+    #         result[k] = []
+    #         for i in range(v):
+    #             n1 = self.alias_edges[(k, node)][0]
+    #             n2 = self.alias_edges[(k, node)][1]
+    #             alias = alias_draw(n1, n2)
+    #             next = node_neighbors[alias]  # RANDOM ACCESS!
+    #             result[k].append(next)
+    #     return result
+    #
+    # # @profile
+    # def update_step(self, drawn, drop_set, walk_length, walks, visit):
+    #     for walk_list in drop_set:
+    #         updated_walks = []
+    #         # Get previous node
+    #         prev = self.get_prev(walk_list[0])
+    #         # Get the dictionary of next steps
+    #         ld = drawn[prev]
+    #         np.random.shuffle(ld)
+    #         for walk_tuple in walk_list:
+    #             next_step = ld.pop()
+    #             updated_walks.append(walk_tuple + (next_step,))
+    #         if len(updated_walks[0]) == walk_length:
+    #             walks += [list(w) for w in updated_walks]
+    #         else:
+    #             visit.add(tuple(updated_walks))
+
+
     def draw_node(self, node, next_steps_len, node_neighbors):
         result = {}
         for k, v in next_steps_len.items():
             result[k] = {}
             for i in range(v):
-                next = node_neighbors[alias_draw(self.alias_nodes[node][0], self.alias_nodes[node][1])]
+                n1 = self.alias_nodes[node][0]
+                n2 = self.alias_nodes[node][1]
+                alias = alias_draw(n1, n2)
+                next = node_neighbors[alias]  # RANDOM ACCESS!
                 result[k][next] = result[k].get(next, 0) + 1
         return result
 
+    @profile
     def draw_edge(self, node, next_steps_len, node_neighbors):
         result = {}
         for k, v in next_steps_len.items():
             result[k] = {}
             for i in range(v):
-                next = node_neighbors[alias_draw(self.alias_edges[(k, node)][0], self.alias_edges[(k, node)][1])]
+                n1 = self.alias_edges[(k, node)][0]
+                n2 = self.alias_edges[(k, node)][1]
+                alias = alias_draw(n1, n2)
+                next = node_neighbors[alias]  # RANDOM ACCESS!
                 result[k][next] = result[k].get(next, 0) + 1
         return result
 
+    @profile
     def update_step(self, drawn, drop_set, walk_length, walks, visit):
         for walk_list in drop_set:
             prev = self.get_prev(walk_list[0])
             updated_walks = []
             for walk_tuple in walk_list:
-                next_step = random.choice(list(drawn[prev].keys()))
+                d = drawn[prev]
+                dk = d.keys()
+                ld = list(dk)
+                next_step = random.choice(ld)
                 updated_walks.append(walk_tuple + (next_step,))
                 drawn[prev][next_step] = drawn[prev][next_step] - 1
                 if not drawn[prev][next_step]:
@@ -56,6 +111,7 @@ class Graph():
     def get_prev(self, walk):
         return walk[-2] if len(walk) > 1 else -1
 
+    @profile
     def node2vec_walk(self, walk_length, start_nodes, num_walks):
         '''
         Simulate a random walk starting from start node.
@@ -73,8 +129,6 @@ class Graph():
                 cur = cur_walk[-1]  # The last node of the currently considered walk
                 drop_set = set()
                 drop_set.add(cur_list)  # Walks that should be removed from visit as they are processed now
-                # dict with number of steps and previous node (if it's not the first iteration) per walk id
-                # next_steps_len = {cur_id: (len(cur_list), cur_walk[0][-2] if len(cur_walk[0]) > 1 else -1)}
                 next_steps_len = {self.get_prev(cur_walk): len(cur_list)}
                 for walk_list in visit:
                     cur_walk_overlap = walk_list[0]
@@ -97,19 +151,15 @@ class Graph():
             visit, visitNext = visitNext, visit
         return walks
 
-    def simulate_walks(self, num_walks, walk_length):
+    def simulate_walks(self, num_walks, walk_length, concurrent_nodes=16):
         '''
         Repeatedly simulate random walks from each node.
         '''
         G = self.G
         walks = []
         nodes = list(G.nodes())
-        # print 'Walk iteration:'
-        # for walk_iter in range(num_walks):
-        #     print str(walk_iter + 1), '/', str(num_walks)
         random.shuffle(nodes)
-        # for node in nodes:
-        for node_chunk in self.chunker(nodes, 16):
+        for node_chunk in self.chunker(nodes, concurrent_nodes):
             walks += self.node2vec_walk(walk_length=walk_length, start_nodes=list(node_chunk), num_walks=num_walks)
 
         return walks
@@ -199,6 +249,7 @@ def alias_setup(probs):
     return J, q
 
 
+# @profile
 def alias_draw(J, q):
     '''
     Draw sample from a non-uniform discrete distribution using alias sampling.

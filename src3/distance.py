@@ -79,9 +79,9 @@ def calc_cluster_distance(c1, c2, k, method):
     mapping = map_clusters(c1, c2, k)
     c1_m = [mapping[el] for el in c1]
     s = get_cluster_sim(c1_m, c2)
-    print(list(c1))
-    print(list(c2))
-    print(c1_m)
+    # print(list(c1))
+    # print(list(c2))
+    # print(c1_m)
     print(f"Different assignments for {method} with {k} clusters: {s}, which gives {(s / len(c1)) * 100:10.2f}%")
 
 def get_gmm_clusters(X, k):

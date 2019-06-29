@@ -36,7 +36,7 @@ class Graph():
 
         return walk
 
-    def simulate_walks(self, num_walks, walk_length):
+    def simulate_walks(self, num_walks, walk_length, nc=1):
         '''
         Repeatedly simulate random walks from each node.
         '''
