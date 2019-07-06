@@ -50,10 +50,11 @@ def get_matrixs(pattern, count):
 
 
 def get_cluster_sim(c1, c2):
-    s = 0
-    for a, b in zip(c1, c2):
-        if a != b:
-            s += 1
+    s = []
+    for i, tup in enumerate(zip(c1, c2)):
+        if tup[0] != tup[1]:
+            # print(f"diff in node {i+1}")
+            s.append(i + 1)
     return s
 
 
@@ -64,7 +65,6 @@ def map_clusters(c1, c2, k):
     for a, b in zip(c1, c2):
         cluster_mapping[a][b] = cluster_mapping[a].get(b, 0) + 1
     return {entry[0]: max(entry[1].items(), key=lambda el: el[1])[0] for entry in cluster_mapping.items()}
-
 
 
 def calc_cluster_distance(c1, c2, k, method):
@@ -82,28 +82,32 @@ def calc_cluster_distance(c1, c2, k, method):
     # print(list(c1))
     # print(list(c2))
     # print(c1_m)
-    print(f"Different assignments for {method} with {k} clusters: {s}, which gives {(s / len(c1)) * 100:10.2f}%")
+    print(f"Different assignments for {method} with {k} clusters: {len(s)}, "
+          f"which gives {(len(s) / len(c1)) * 100:10.2f}%, diff nodes: {s}")
+
 
 def get_gmm_clusters(X, k):
     gmm = mixture.BayesianGaussianMixture(n_components=k, covariance_type='full').fit(X)
     return gmm.predict(X)
 
+
 def get_km_clusters(X, k):
     return cluster.KMeans(n_clusters=k, random_state=0).fit(X).labels_
 
+
 def cluster_distance(embeddings, k):
-    embeddings = [sorted(el, key=lambda e: e[1]) for el in embeddings]
-    clear_embeddings = []
-    for emb in embeddings:
+    embeddings = {key: sorted(val, key=lambda e: e[1]) for key, val in embeddings.items()}
+    clear_embeddings = {}
+    for key, emb in embeddings.items():
         clear_emb = []
         for el in emb:
             clear_emb.append(el[0])
-        clear_embeddings.append(clear_emb)
-    for i, el1 in enumerate(clear_embeddings):
-        for j, el2 in enumerate(clear_embeddings):
-            print(f"{i}/{j}")
-            calc_cluster_distance(get_gmm_clusters(el1, k), get_gmm_clusters(el2, k), k, "BGMM")
-            calc_cluster_distance(get_km_clusters(el1, k), get_km_clusters(el2, k), k, "KMeans")
+        clear_embeddings[key] = clear_emb
+    for i, el1 in enumerate(clear_embeddings.items()):
+        for j, el2 in enumerate(clear_embeddings.items()):
+            print(f"{el1[0]} / {el2[0]}")
+            # calc_cluster_distance(get_gmm_clusters(el1, k), get_gmm_clusters(el2, k), k, "BGMM")
+            calc_cluster_distance(get_km_clusters(el1[1], k), get_km_clusters(el2[1], k), k, "KMeans")
             print("---------------")
 # calc_matrix_norm(get_matrixs('../emb/lesmis{}.emb', 4))
 

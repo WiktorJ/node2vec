@@ -14,7 +14,7 @@ config = {
     # 'output': '../emb/lesmis{}.emb',
     'dimensions': 16,
     'walk_length': 80,
-    'num_walks': 64,
+    'num_walks': 120,
     'window_size': 10,
     'iter': 10,
     'workers': 8,
@@ -72,7 +72,7 @@ def test(config, impl, nc):
 
 
 
-test_count = 2
+test_count = 3
 
 output_schema = '../emb/lesmis{}.emb',
 
@@ -80,26 +80,26 @@ outputs_ms = [('../emb/lesmis' + str(i + 1) + '.emb', "MS_" + str(i + 1)) for i 
 outputs_base = [('../emb/lesmis' + str(i + 1) + '.emb', "base_" + str(i + 1)) for i in
                 range(test_count, 2 * test_count)]
 
-res = []
+res = {}
 
 
 # for i in range(10):
 #     test(config, node2vec_ms, 2**(i+1))
 
-test(config, node2vec_ms, 4)
+# test(config, node2vec_ms, 4)
 #
-# for i in range(test_count):
-#     config['output'] = '../emb/lesmis' + str(i + 1) + '.emb'
-#     res.append(test(config, node2vec_ms, 4))
+for i in range(test_count):
+    config['output'] = f"../emb/lesmis_ms{i+1}.emb"
+    res[f'lesmis_ms{i+1}'] = test(config, node2vec_ms, 4)
 
 # for i in range(test_count, 2 * test_count):
 #     config['output'] = '../emb/lesmis' + str(i + 1) + '.emb'
 #     res.append(test(config, node2vec_revers))
 
-# for i in range(2 * test_count, 3 * test_count):
-#     config['output'] = '../emb/lesmis' + str(i + 1) + '.emb'
-#     res.append(test(config, node2vec, 4))
+for i in range(test_count):
+    config['output'] = f"../emb/lesmis{i+1}.emb"
+    res[f'lesmis{i+1}'] = test(config, node2vec, 4)
 
-# cluster_distance(res, 6)
+cluster_distance(res, 6)
 
 # calc_matrix_norm(get_matrixs('../emb/lesmis{}.emb', 3*test_count))

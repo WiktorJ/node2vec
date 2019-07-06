@@ -20,98 +20,98 @@ class Graph():
                 return
             yield chain((first,), chunk)
 
-    # # @profile
+    # @profile
+    def draw_node(self, node, next_steps_len, node_neighbors):
+        result = {}
+        for k, v in next_steps_len.items():
+            result[k] = []
+            for i in range(v):
+                n1 = self.alias_nodes[node][0]
+                n2 = self.alias_nodes[node][1]
+                alias = alias_draw(n1, n2)
+                next = node_neighbors[alias]  # RANDOM ACCESS!
+                result[k].append(next)
+        return result
+
+    # @profile
+    def draw_edge(self, node, next_steps_len, node_neighbors):
+        result = {}
+        for k, v in next_steps_len.items():
+            result[k] = []
+            for i in range(v):
+                n1 = self.alias_edges[(k, node)][0]
+                n2 = self.alias_edges[(k, node)][1]
+                alias = alias_draw(n1, n2)
+                next = node_neighbors[alias]  # RANDOM ACCESS!
+                result[k].append(next)
+        return result
+
+    # @profile
+    def update_step(self, drawn, drop_set, walk_length, walks, visit):
+        for walk_list in drop_set:
+            updated_walks = []
+            # Get previous node
+            prev = self.get_prev(walk_list[0])
+            # Get the dictionary of next steps
+            ld = drawn[prev]
+            np.random.shuffle(ld)
+            for walk_tuple in walk_list:
+                next_step = ld.pop()
+                updated_walks.append(walk_tuple + (next_step,))
+            if len(updated_walks[0]) == walk_length:
+                walks += [list(w) for w in updated_walks]
+            else:
+                visit.add(tuple(updated_walks))
+
+
     # def draw_node(self, node, next_steps_len, node_neighbors):
     #     result = {}
     #     for k, v in next_steps_len.items():
-    #         result[k] = []
+    #         result[k] = {}
     #         for i in range(v):
     #             n1 = self.alias_nodes[node][0]
     #             n2 = self.alias_nodes[node][1]
     #             alias = alias_draw(n1, n2)
     #             next = node_neighbors[alias]  # RANDOM ACCESS!
-    #             result[k].append(next)
+    #             result[k][next] = result[k].get(next, 0) + 1
     #     return result
     #
     # # @profile
     # def draw_edge(self, node, next_steps_len, node_neighbors):
     #     result = {}
     #     for k, v in next_steps_len.items():
-    #         result[k] = []
+    #         result[k] = {}
     #         for i in range(v):
     #             n1 = self.alias_edges[(k, node)][0]
     #             n2 = self.alias_edges[(k, node)][1]
     #             alias = alias_draw(n1, n2)
     #             next = node_neighbors[alias]  # RANDOM ACCESS!
-    #             result[k].append(next)
+    #             result[k][next] = result[k].get(next, 0) + 1
     #     return result
     #
     # # @profile
     # def update_step(self, drawn, drop_set, walk_length, walks, visit):
     #     for walk_list in drop_set:
-    #         updated_walks = []
-    #         # Get previous node
     #         prev = self.get_prev(walk_list[0])
-    #         # Get the dictionary of next steps
-    #         ld = drawn[prev]
-    #         np.random.shuffle(ld)
+    #         updated_walks = []
     #         for walk_tuple in walk_list:
-    #             next_step = ld.pop()
+    #             d = drawn[prev]
+    #             dk = d.keys()
+    #             ld = list(dk)
+    #             next_step = random.choice(ld)
     #             updated_walks.append(walk_tuple + (next_step,))
+    #             drawn[prev][next_step] = drawn[prev][next_step] - 1
+    #             if not drawn[prev][next_step]:
+    #                 del drawn[prev][next_step]
     #         if len(updated_walks[0]) == walk_length:
     #             walks += [list(w) for w in updated_walks]
     #         else:
     #             visit.add(tuple(updated_walks))
 
-
-    def draw_node(self, node, next_steps_len, node_neighbors):
-        result = {}
-        for k, v in next_steps_len.items():
-            result[k] = {}
-            for i in range(v):
-                n1 = self.alias_nodes[node][0]
-                n2 = self.alias_nodes[node][1]
-                alias = alias_draw(n1, n2)
-                next = node_neighbors[alias]  # RANDOM ACCESS!
-                result[k][next] = result[k].get(next, 0) + 1
-        return result
-
-    @profile
-    def draw_edge(self, node, next_steps_len, node_neighbors):
-        result = {}
-        for k, v in next_steps_len.items():
-            result[k] = {}
-            for i in range(v):
-                n1 = self.alias_edges[(k, node)][0]
-                n2 = self.alias_edges[(k, node)][1]
-                alias = alias_draw(n1, n2)
-                next = node_neighbors[alias]  # RANDOM ACCESS!
-                result[k][next] = result[k].get(next, 0) + 1
-        return result
-
-    @profile
-    def update_step(self, drawn, drop_set, walk_length, walks, visit):
-        for walk_list in drop_set:
-            prev = self.get_prev(walk_list[0])
-            updated_walks = []
-            for walk_tuple in walk_list:
-                d = drawn[prev]
-                dk = d.keys()
-                ld = list(dk)
-                next_step = random.choice(ld)
-                updated_walks.append(walk_tuple + (next_step,))
-                drawn[prev][next_step] = drawn[prev][next_step] - 1
-                if not drawn[prev][next_step]:
-                    del drawn[prev][next_step]
-            if len(updated_walks[0]) == walk_length:
-                walks += [list(w) for w in updated_walks]
-            else:
-                visit.add(tuple(updated_walks))
-
     def get_prev(self, walk):
         return walk[-2] if len(walk) > 1 else -1
 
-    @profile
+    # @profile
     def node2vec_walk(self, walk_length, start_nodes, num_walks):
         '''
         Simulate a random walk starting from start node.

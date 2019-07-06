@@ -8,12 +8,14 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from sklearn import mixture
 from sklearn import cluster
+
+from distance import map_clusters, get_gmm_clusters
 from utils import get_as_numpy_array
 
 G = nx.Graph()
 
 color_iter = itertools.cycle(['navy', 'c', 'cornflowerblue', 'gold',
-                              'darkorange'])
+                              'darkorange', 'black'])
 
 
 def plot_results(X, Y_, means, covariances, index, title):
@@ -45,23 +47,56 @@ def plot_results(X, Y_, means, covariances, index, title):
     plt.title(title)
 
 
+def get_different_assignments(labels1, labels2):
+    s = []
+    for i, tup in enumerate(zip(labels1, labels2)):
+        if tup[0] != tup[1]:
+            s.append(i)
+    return s
+
+
+
 with open('../graph/lesmis.edgelist') as graph_file:
     graph_csv = csv.reader(graph_file, delimiter=' ')
     for row in graph_csv:
         G.add_edge(int(row[0]), int(row[1]))
 
-d = nx.degree(G)
+d = dict(nx.degree(G))
 
-X = get_as_numpy_array('../emb/lesmis1.emb')
+embeddings = ["lesmis2", "lesmis1"]
 
-gmm = mixture.BayesianGaussianMixture(n_components=6, covariance_type='full').fit(X)
-kmeans = cluster.KMeans(n_clusters=6, random_state=0).fit(X)
-print(kmeans.labels_)
-# prediction = gmm.predict(X)
-prediction = kmeans.labels_
+Xs = [get_as_numpy_array(f'../emb/{embedding}.emb') for embedding in embeddings]
+# predictions = [cluster.KMeans(n_clusters=6, random_state=0).fit(X).labels_ for X in Xs]
+predictions = [get_gmm_clusters(X, 6) for X in Xs]
+
+mapping = map_clusters(predictions[0], predictions[1], 6)
+predictions[0] = [mapping[el] for el in predictions[0]]
+# print(kmeans.labels_)
 # plot_results(X, prediction, gmm.means_, gmm.covariances_, 1,
 #              'Bayesian Gaussian Mixture with a Dirichlet process prior')
 
-nx.draw(G, node_size=d,
-        node_color=prediction)
+diff = get_different_assignments(predictions[0], predictions[1])
+
+labels = {i + 1: 'X' if i in diff else '' for i in range(len(G.nodes))}
+
+pos = nx.spring_layout(G)
+plt.title(embeddings[0])
+nx.draw(G, pos=pos, node_list=d.keys(), node_size=[n * 2 for n in d.values()],
+        node_color=predictions[0], width=0.05, with_labels=True, font_size=8)
+plt.show(dpi=1500)
+
+plt.title(embeddings[0])
+nx.draw(G, pos=pos, node_list=d.keys(), node_size=[n * 2 for n in d.values()],
+        node_color=predictions[0], width=0.05)
+nx.draw_networkx_labels(G, pos, labels=labels)
+plt.show(dpi=1500)
+
+plt.title(embeddings[0])
+nx.draw(G, pos=pos, node_list=d.keys(), node_size=[n * 2 for n in d.values()],
+        node_color=predictions[0], width=0.05)
+plt.show(dpi=1500)
+
+plt.title(embeddings[1])
+nx.draw(G, pos=pos, node_list=d.keys(), node_size=[n * 2 for n in d.values()],
+        node_color=predictions[1], width=0.05)
 plt.show(dpi=1500)
