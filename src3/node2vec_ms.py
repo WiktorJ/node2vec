@@ -10,6 +10,7 @@ class Graph():
         self.p = p
         self.q = q
 
+    # @profile
     def chunker(self, iterable, n):
         it = iter(iterable)
         while True:
@@ -62,7 +63,6 @@ class Graph():
                 walks += [list(w) for w in updated_walks]
             else:
                 visit.add(tuple(updated_walks))
-
 
     # def draw_node(self, node, next_steps_len, node_neighbors):
     #     result = {}
@@ -151,6 +151,7 @@ class Graph():
             visit, visitNext = visitNext, visit
         return walks
 
+    # @profile
     def simulate_walks(self, num_walks, walk_length, concurrent_nodes=16):
         '''
         Repeatedly simulate random walks from each node.
@@ -159,11 +160,16 @@ class Graph():
         walks = []
         nodes = list(G.nodes())
         random.shuffle(nodes)
+        i = 0
         for node_chunk in self.chunker(nodes, concurrent_nodes):
+            # i += 1
+            # if i % 100 == 0:
+            #     print(
+            #         f"processed {i} chunks of {int(len(nodes) / concurrent_nodes)} in total. Chunk size: {concurrent_nodes}")
             walks += self.node2vec_walk(walk_length=walk_length, start_nodes=list(node_chunk), num_walks=num_walks)
-
         return walks
 
+    # @profile
     def get_alias_edge(self, src, dst):
         '''
         Get the alias edge setup lists for a given edge.
@@ -185,6 +191,7 @@ class Graph():
 
         return alias_setup(normalized_probs)
 
+    # @profile
     def preprocess_transition_probs(self):
         '''
         Preprocessing of transition probabilities for guiding the random walks.
@@ -216,6 +223,7 @@ class Graph():
         return
 
 
+# @profile
 def alias_setup(probs):
     '''
     Compute utility lists for non-uniform sampling from discrete distributions.
@@ -256,7 +264,7 @@ def alias_draw(J, q):
     '''
     K = len(J)
 
-    kk = int(np.floor(np.random.rand() * K))
+    kk = int(np.random.rand() * K)
     if np.random.rand() < q[kk]:
         return kk
     else:

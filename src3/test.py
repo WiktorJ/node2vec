@@ -10,7 +10,8 @@ from distance import get_matrixs, calc_matrix_norm, cluster_distance
 
 config = {
     # 'input': '../graph/facebook_combined.edgelist',
-    'input': '../graph/lesmis.edgelist',
+    'input': '../graph/email-Eu-core.txt',
+    # 'input': '../graph/lesmis.edgelist',
     # 'output': '../emb/lesmis{}.emb',
     'dimensions': 16,
     'walk_length': 80,
@@ -64,15 +65,15 @@ def test(config, impl, nc):
     G.preprocess_transition_probs()
     walks = G.simulate_walks(config['num_walks'], config['walk_length'], nc)
     walk_end = time.time()
-    print(f"Walk Time: {walk_end - start}, NC: {nc}")
-    emb =learn_embeddings(walks, config)
+    print(f"Walk Time: {walk_end - start}, Concurrent walks: {nc}")
+    # emb =learn_embeddings(walks, config)
     # print(f"Emb Time: {time.time() - walk_end}")
     # print(f"Total Time: {time.time() - start}")
-    return emb
+    # return emb
+    return 1
 
 
-
-test_count = 3
+test_count = 1
 
 output_schema = '../emb/lesmis{}.emb',
 
@@ -82,24 +83,26 @@ outputs_base = [('../emb/lesmis' + str(i + 1) + '.emb', "base_" + str(i + 1)) fo
 
 res = {}
 
+for el in [1, 2, 4, 6, 8, 12, 16, 24, 32, 64, 128]:
+    test(config, node2vec_ms, el)
 
 # for i in range(10):
 #     test(config, node2vec_ms, 2**(i+1))
 
 # test(config, node2vec_ms, 4)
 #
-for i in range(test_count):
-    config['output'] = f"../emb/lesmis_ms{i+1}.emb"
-    res[f'lesmis_ms{i+1}'] = test(config, node2vec_ms, 4)
+# for i in range(test_count):
+#     config['output'] = f"../emb/lesmis_ms{i+1}.emb"
+#     res[f'lesmis_ms{i+1}'] = test(config, node2vec_ms, 1)
 
 # for i in range(test_count, 2 * test_count):
 #     config['output'] = '../emb/lesmis' + str(i + 1) + '.emb'
 #     res.append(test(config, node2vec_revers))
 
-for i in range(test_count):
-    config['output'] = f"../emb/lesmis{i+1}.emb"
-    res[f'lesmis{i+1}'] = test(config, node2vec, 4)
+# for i in range(test_count):
+#     config['output'] = f"../emb/lesmis{i+1}.emb"
+#     res[f'lesmis{i+1}'] = test(config, node2vec, 4)
 
-cluster_distance(res, 6)
+# cluster_distance(res, 6)
 
 # calc_matrix_norm(get_matrixs('../emb/lesmis{}.emb', 3*test_count))
