@@ -30,7 +30,7 @@ class Graph():
                 n1 = self.alias_nodes[node][0]
                 n2 = self.alias_nodes[node][1]
                 alias = alias_draw(n1, n2)
-                next = node_neighbors[alias]  # RANDOM ACCESS!
+                next = node_neighbors[alias]
                 result[k].append(next)
         return result
 
@@ -43,7 +43,7 @@ class Graph():
                 n1 = self.alias_edges[(k, node)][0]
                 n2 = self.alias_edges[(k, node)][1]
                 alias = alias_draw(n1, n2)
-                next = node_neighbors[alias]  # RANDOM ACCESS!
+                next = node_neighbors[alias]
                 result[k].append(next)
         return result
 
