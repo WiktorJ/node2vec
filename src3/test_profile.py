@@ -1,10 +1,12 @@
+#!/usr/bin/python3
 import networkx as nx
 import node2vec_ms as node2vec
 from gensim.models import Word2Vec
+from line_profiler import LineProfiler
 
 config = {
-    'input': '../graph/facebook_combined.edgelist',
-    # 'input': '../graph/lesmis.edgelist',
+    # 'input': '../graph/facebook_combined.edgelist',
+    'input': '../graph/lesmis.edgelist',
     # 'output': '../emb/lesmis{}.emb',
     'dimensions': 16,
     'walk_length': 80,
@@ -66,4 +68,20 @@ def main(config):
 # learn_embeddings(walks)
 
 if __name__ == "__main__":
-    main(config)
+    lp = LineProfiler()
+    lp.add_function(node2vec.Graph.chunker)
+    lp.add_function(node2vec.Graph.draw_node)
+    lp.add_function(node2vec.Graph.draw_edge)
+    lp.add_function(node2vec.Graph.update_step)
+    lp.add_function(node2vec.Graph.get_prev)
+    lp.add_function(node2vec.Graph.node2vec_walk)
+    lp.add_function(node2vec.Graph.simulate_walks)
+    lp.add_function(node2vec.Graph.get_alias_edge)
+    lp.add_function(node2vec.Graph.preprocess_transition_probs)
+    lp.add_function(node2vec.alias_draw)
+    lp.add_function(node2vec.alias_setup)
+    lp.add_function(learn_embeddings)
+    lp.add_function(read_graph)
+    lp_wrapper = lp(main)
+    lp_wrapper(config)
+    lp.print_stats()
