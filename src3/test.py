@@ -3,6 +3,7 @@ import numpy as np
 import networkx as nx
 import node2vec_ms
 import node2vec_ms_walk
+import node2vec_ms_walk2
 import node2vec_revers
 import node2vec
 from gensim.models import Word2Vec
@@ -10,14 +11,14 @@ import time
 from distance import get_matrixs, calc_matrix_norm, cluster_distance
 
 config = {
-    # 'input': '../graph/facebook_combined.edgelist',
+    'input': '../graph/facebook_combined.edgelist',
     # 'input': '../graph/artist_edges.edgelist',
-    'input': '../graph/email-Eu-core.txt',
+    # 'input': '../graph/email-Eu-core.txt',
     # 'input': '../graph/lesmis.edgelist',
     # 'output': '../emb/lesmis{}.emb',
     'dimensions': 16,
     'walk_length': 80,
-    'num_walks': 20,
+    'num_walks': 120,
     'window_size': 10,
     'iter': 10,
     'workers': 8,
@@ -87,16 +88,21 @@ res = {}
 print("Base times")
 for el in [1]:
     test(config, node2vec, el)
-
-print()
+#
+# print()
 print("No hash grouping")
-for el in [1, 2, 4, 6, 8, 12, 16, 24, 32, 64, 128]:
+for el in [1,64,128,512]:
     test(config, node2vec_ms, el)
 
 print()
 print("Hash grouping")
-for el in [1, 2, 4, 6, 8, 12, 16, 24, 32, 64, 128]:
+for el in [1, 2, 4, 6, 8, 12, 16, 24, 32, 64, 128, 256, 512]:
     test(config, node2vec_ms_walk, el)
+
+print()
+print("Hash grouping2")
+for el in [1, 2, 4, 6, 8, 12, 16, 24, 32, 64, 128, 256, 512]:
+    test(config, node2vec_ms_walk2, el)
 
 # for i in range(10):
 #     test(config, node2vec_ms, 2**(i+1))

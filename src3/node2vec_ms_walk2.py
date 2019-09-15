@@ -30,14 +30,6 @@ class Graph:
         self.p = p
         self.q = q
         self.neighbors = {}
-        for node in self.G.nodes:
-            self.neighbors[node] = sorted(self.G.neighbors(node))
-
-    # def neighbor_chunker(self, n):
-    #     from copy import deepcopy
-    #     neighbors = list(self.neighbors.keys())
-    #     while True:
-    #         chunk =
 
     def chunker(self, iterable, n):
         it = iter(iterable)
@@ -49,53 +41,32 @@ class Graph:
                 return
             yield chain((first,), chunk)
 
-    def draw_node(self, node, steps_number, node_neighbors):
-        result = []
-        for _ in range(steps_number//2):
-            n1 = self.alias_nodes[node][0]
-            n2 = self.alias_nodes[node][1]
-            alias = alias_draw(n1, n2)
-            next = node_neighbors[alias]
-            result.append(next)
-            result.append(next)
-        if steps_number % 2 == 1:
-            n1 = self.alias_nodes[node][0]
-            n2 = self.alias_nodes[node][1]
-            alias = alias_draw(n1, n2)
-            next = node_neighbors[alias]
-            result.append(next)
-        np.random.shuffle(result)
-        return result
+    def draw_node(self, node, node_neighbors):
+        n1 = self.alias_nodes[node][0]
+        n2 = self.alias_nodes[node][1]
+        alias = alias_draw(n1, n2)
+        return node_neighbors[alias]
 
-    def draw_edge(self, pair, steps_number, node_neighbors):
-        result = []
-        # if steps_number/len(node_neighbors) > 1:
-        #     print(steps_number/len(node_neighbors))
-        for _ in range(steps_number//2):
-            n1, n2 = self.alias_edges[(pair[1], pair[0])]
-            alias = alias_draw(n1, n2)
-            next = node_neighbors[alias]
-            result.append(next)
-            result.append(next)
-        if steps_number % 2 == 1:
-            n1, n2 = self.alias_edges[(pair[1], pair[0])]
-            alias = alias_draw(n1, n2)
-            next = node_neighbors[alias]
-            result.append(next)
-        np.random.shuffle(result)
-        return result
+    def draw_edge(self, curr, prev, node_neighbors):
+        n1, n2 = self.alias_edges[(prev, curr)]
+        alias = alias_draw(n1, n2)
+        return node_neighbors[alias]
 
-    def update_step(self, drawn, current_node, walks, visit_dict_next, completed_walks, walk_len):
+    def update_step(self, current_node, walks, visit_dict_next, completed_walks, walk_len):
         # np.random.shuffle(drawn) consider if this is necessary (or some other way of randomizing the order).
         # Simply iterating drawn might introduce some bias
-        for new_node in drawn:
-            new_pair = current_node, new_node
-            new_walk = walks.pop() + [new_node]
+
+        for walk in walks:
+            if len(walk) == 1:
+                new_node = self.draw_node(current_node, self.neighbors[current_node])
+            else:
+                new_node = self.draw_edge(current_node, walk[-2], self.neighbors[current_node])
+            new_walk = walk + [new_node]
             if len(new_walk) == walk_len:
                 completed_walks.append(new_walk)
             else:
-                visit_dict_next[new_pair] = visit_dict_next.get(new_pair, [])
-                visit_dict_next[new_pair].append(new_walk)
+                visit_dict_next[new_node] = visit_dict_next.get(new_node, [])
+                visit_dict_next[new_node].append(new_walk)
 
     def get_prev(self, walk):
         return walk[-2] if len(walk) > 1 else -1
@@ -111,20 +82,20 @@ class Graph:
         G = self.G
 
         for start_node in start_nodes:
-            visit_dict[(start_node, None)] = [[start_node] for _ in range(num_walks)]
+            visit_dict[start_node] = [[start_node] for _ in range(num_walks)]
 
         while visit_dict:
             while visit_dict:
-                (current_node, previous_node), walks = visit_dict.popitem()
-                cur_nbrs = sorted(G.neighbors(current_node))
+                current_node, walks = visit_dict.popitem()
+                cur_nbrs = self.neighbors[current_node]
 
                 if len(cur_nbrs) > 0:
                     if len(walks[0]) == 1:
-                        drawn = self.draw_node(current_node, len(walks), cur_nbrs)
-                        self.update_step(drawn, current_node, walks, visit_dict_next, completed_walks, walk_length)
+                        # drawn = self.draw_node(current_node, le/n(walks), cur_nbrs)
+                        self.update_step(current_node, walks, visit_dict_next, completed_walks, walk_length)
                     else:
-                        drawn = self.draw_edge((current_node, previous_node), len(walks), cur_nbrs)
-                        self.update_step(drawn, current_node, walks, visit_dict_next, completed_walks, walk_length)
+                        # drawn = self.draw_edge(current_node, len(walks), cur_nbrs)
+                        self.update_step(current_node, walks, visit_dict_next, completed_walks, walk_length)
                 else:
                     print("HANDLE NODE WITH NO NEIGHBORS")  # Probably just continue
             visit_dict, visit_dict_next = visit_dict_next, visit_dict
@@ -138,6 +109,8 @@ class Graph:
         G = self.G
         walks = []
         nodes = list(G.nodes())
+        for node in nodes:
+            self.neighbors[node] = sorted(G.neighbors(node))
         random.shuffle(nodes)
         i = 0
         for node_chunk in self.chunker(nodes, concurrent_nodes):
