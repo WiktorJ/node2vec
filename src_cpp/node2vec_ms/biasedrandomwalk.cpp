@@ -128,16 +128,21 @@ int64 PredictMemoryRequirements(PWNet& InNet) {
 }
 
 //Simulates a random walk
-void SimulateWalk(PWNet& InNet, int64 StartNId, const int& WalkLen, TRnd& Rnd, TIntV& WalkV) {
-  WalkV.Add(StartNId);
-  if (WalkLen == 1) { return; }
-  if (InNet->GetNI(StartNId).GetOutDeg() == 0) { return; }
-  WalkV.Add(InNet->GetNI(StartNId).GetNbrNId(Rnd.GetUniDevInt(InNet->GetNI(StartNId).GetOutDeg())));
-  while (WalkV.Len() < WalkLen) {
-    int64 Dst = WalkV.Last();
-    int64 Src = WalkV.LastLast();
-    if (InNet->GetNI(Dst).GetOutDeg() == 0) { return; }
-    int64 Next = AliasDrawInt(InNet->GetNDat(Dst).GetDat(Src),Rnd);
-    WalkV.Add(InNet->GetNI(Dst).GetNbrNId(Next));
+std::vector<TIntV> SimulateWalk(PWNet& InNet, std::vector<int64> StartNodeIs, const int& WalkLen, const int& NumWalk, TRnd& Rnd) {
+  std::vector<TIntV> WalksV;
+//  std::set<>
+  for(auto& StartNId : StartNodeIs) {
+    WalkV.Add(StartNId);
+    if (WalkLen == 1) { return WalkV; }
+    if (InNet->GetNI(StartNId).GetOutDeg() == 0) { return WalkV; }
+    WalkV.Add(InNet->GetNI(StartNId).GetNbrNId(Rnd.GetUniDevInt(InNet->GetNI(StartNId).GetOutDeg())));
+    while (WalkV.Len() < WalkLen) {
+      int64 Dst = WalkV.Last();
+      int64 Src = WalkV.LastLast();
+      if (InNet->GetNI(Dst).GetOutDeg() == 0) { return WalkV; }
+      int64 Next = AliasDrawInt(InNet->GetNDat(Dst).GetDat(Src), Rnd);
+      WalkV.Add(InNet->GetNI(Dst).GetNbrNId(Next));
+    }
   }
+  return WalkV;
 }

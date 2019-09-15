@@ -2,6 +2,7 @@ import math
 import numpy as np
 import networkx as nx
 import node2vec_ms
+import node2vec_ms_walk
 import node2vec_revers
 import node2vec
 from gensim.models import Word2Vec
@@ -10,12 +11,12 @@ from distance import get_matrixs, calc_matrix_norm, cluster_distance
 
 config = {
     # 'input': '../graph/facebook_combined.edgelist',
-    'input': '../graph/email-Eu-core.txt',
-    # 'input': '../graph/lesmis.edgelist',
+    # 'input': '../graph/email-Eu-core.txt',
+    'input': '../graph/lesmis.edgelist',
     # 'output': '../emb/lesmis{}.emb',
     'dimensions': 16,
     'walk_length': 80,
-    'num_walks': 120,
+    'num_walks': 20,
     'window_size': 10,
     'iter': 10,
     'workers': 8,
@@ -82,9 +83,19 @@ outputs_base = [('../emb/lesmis' + str(i + 1) + '.emb', "base_" + str(i + 1)) fo
                 range(test_count, 2 * test_count)]
 
 res = {}
+print("Base times")
+for el in [1, 2, 4, 6, 8, 12, 16, 24, 32, 64, 128]:
+    test(config, node2vec, el)
 
+print()
+print("No hash grouping")
 for el in [1, 2, 4, 6, 8, 12, 16, 24, 32, 64, 128]:
     test(config, node2vec_ms, el)
+    
+print()
+print("Hash grouping")
+for el in [1, 2, 4, 6, 8, 12, 16, 24, 32, 64, 128]:
+    test(config, node2vec_ms_walk, el)
 
 # for i in range(10):
 #     test(config, node2vec_ms, 2**(i+1))

@@ -1,6 +1,7 @@
 #include <chrono>
 #include "stdafx.h"
 #include "n2v.h"
+#include "vector"
 
 void node2vec(PWNet &InNet, const double &ParamP, const double &ParamQ,
               const int &Dimensions, const int &WalkLen, const int &NumWalks,
@@ -15,26 +16,29 @@ void node2vec(PWNet &InNet, const double &ParamP, const double &ParamQ,
         NIdsV.Add(NI.GetId());
     }
     //Generate random walks
-    int64 AllWalks = (int64) NumWalks * NIdsV.Len();
+//    int64 AllWalks = (int64) NumWalks * NIdsV.Len();
+    int64 AllWalks = (int64) NIdsV.Len();
     WalksVV = TVVec<TInt, int64>(AllWalks, WalkLen);
     TRnd Rnd(time(NULL));
     int64 WalksDone = 0;
-    for (int64 i = 0; i < NumWalks; i++) {
-        NIdsV.Shuffle(Rnd);
-#pragma omp parallel for schedule(dynamic)
-        for (int64 j = 0; j < NIdsV.Len(); j++) {
-            if (Verbose && WalksDone % 10000 == 0) {
-                printf("\rWalking Progress: %.2lf%%", (double) WalksDone * 100 / (double) AllWalks);
-                fflush(stdout);
-            }
-            TIntV WalkV;
-            SimulateWalk(InNet, NIdsV[j], WalkLen, Rnd, WalkV);
-            for (int64 k = 0; k < WalkV.Len(); k++) {
-                WalksVV.PutXY(i * NIdsV.Len() + j, k, WalkV[k]);
-            }
-            WalksDone++;
+
+    for (int i = 0; i < NIdsV.Len(); ++i) {
+        if (Verbose && WalksDone % 10000 == 0) {
+//        if (Verbose) {
+            printf("\rWalking Progress: %.2lf%%", (double) WalksDone * 100 / (double) AllWalks);
+            printf("\rWalks done: %lld", WalksDone);
+            fflush(stdout);
         }
+
+        std::vector<int64> start_nodes;
+        start_nodes.push_back(NIdsV[i]);
+        TIntV WalkV = SimulateWalk(InNet, start_nodes, WalkLen, NumWalks, Rnd);
+        for (int64 k = 0; k < WalkV.Len(); k++) {
+            WalksVV.PutXY(i, k, WalkV[k]);
+        }
+        WalksDone++;
     }
+
 //  if (Verbose) {
 //    printf("\n");
 //    fflush(stdout);

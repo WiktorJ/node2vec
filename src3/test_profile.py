@@ -58,6 +58,7 @@ def main(config):
     '''
     Pipeline for representational learning for all nodes in a graph.
     '''
+
     nx_G = read_graph(config)
     G = node2vec.Graph(nx_G, config['directed'], config['p'], config['q'])
     G.preprocess_transition_probs()

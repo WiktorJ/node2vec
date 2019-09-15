@@ -22,6 +22,7 @@ set(OBJS ${EXSNAP}/Snap.o )
 include_directories(${SOURCEROOT} ${EXGLIBADV} ${EXGLIB} ${EXSNAP} ${EXSNAPADV})
 
 add_subdirectory(node2vec_ms)
+add_subdirectory(node2vec)
 
 SET_SOURCE_FILES_PROPERTIES(
         ${OBJS}
