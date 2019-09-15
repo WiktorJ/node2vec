@@ -33,11 +33,30 @@ class Graph:
         for node in self.G.nodes:
             self.neighbors[node] = sorted(self.G.neighbors(node))
 
-    # def neighbor_chunker(self, n):
-    #     from copy import deepcopy
-    #     neighbors = list(self.neighbors.keys())
-    #     while True:
-    #         chunk =
+    def neighbor_chunker(self, n):
+        neighbors = set(self.neighbors.keys())
+        while True:
+            chunk = []
+            while True:
+                if len(chunk) == n or len(neighbors) == 0:
+                    break
+                node = neighbors.pop()
+                chunk.append(node)
+                if len(chunk) == n or len(neighbors) == 0:
+                    break
+                for no in self.neighbors[node]:
+                    try:
+                        neighbors.remove(no)
+                    except Exception:
+                        if len(chunk) == n or len(neighbors) == 0:
+                            break
+                    else:
+                        chunk.append(no)
+                        if len(chunk) == n or len(neighbors) == 0:
+                            break
+            if len(neighbors) == 0 and len(chunk) == 0:
+                return
+            yield iter(chunk)
 
     def chunker(self, iterable, n):
         it = iter(iterable)
@@ -51,7 +70,7 @@ class Graph:
 
     def draw_node(self, node, steps_number, node_neighbors):
         result = []
-        for _ in range(steps_number//2):
+        for _ in range(steps_number // 2):
             n1 = self.alias_nodes[node][0]
             n2 = self.alias_nodes[node][1]
             alias = alias_draw(n1, n2)
@@ -71,7 +90,7 @@ class Graph:
         result = []
         # if steps_number/len(node_neighbors) > 1:
         #     print(steps_number/len(node_neighbors))
-        for _ in range(steps_number//2):
+        for _ in range(steps_number // 2):
             n1, n2 = self.alias_edges[(pair[1], pair[0])]
             alias = alias_draw(n1, n2)
             next = node_neighbors[alias]
@@ -140,12 +159,13 @@ class Graph:
         nodes = list(G.nodes())
         random.shuffle(nodes)
         i = 0
-        for node_chunk in self.chunker(nodes, concurrent_nodes):
+        for node_chunk in self.neighbor_chunker(concurrent_nodes):
             # i += 1
             # if i % 100 == 0:
             #     print(
             #         f"processed {i} chunks of {int(len(nodes) / concurrent_nodes)} in total. Chunk size: {concurrent_nodes}")
-            walks += self.node2vec_walk(walk_length=walk_length, start_nodes=list(node_chunk), num_walks=num_walks)
+            start_nodes = list(node_chunk)
+            walks += self.node2vec_walk(walk_length=walk_length, start_nodes=start_nodes, num_walks=num_walks)
         return walks
 
     def get_alias_edge(self, src, dst):

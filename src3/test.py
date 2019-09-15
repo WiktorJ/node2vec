@@ -99,10 +99,10 @@ print("Hash grouping")
 for el in [1, 2, 4, 6, 8, 12, 16, 24, 32, 64, 128, 256, 512]:
     test(config, node2vec_ms_walk, el)
 
-print()
-print("Hash grouping2")
-for el in [1, 2, 4, 6, 8, 12, 16, 24, 32, 64, 128, 256, 512]:
-    test(config, node2vec_ms_walk2, el)
+# print()
+# print("Hash grouping2")
+# for el in [1, 2, 4, 6, 8, 12, 16, 24, 32, 64, 128, 256, 512]:
+#     test(config, node2vec_ms_walk2, el)
 
 # for i in range(10):
 #     test(config, node2vec_ms, 2**(i+1))
