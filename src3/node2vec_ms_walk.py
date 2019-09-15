@@ -70,14 +70,14 @@ class Graph:
 
     def draw_node(self, node, steps_number, node_neighbors):
         result = []
-        for _ in range(steps_number // 2):
+        for _ in range(steps_number // 4):
             n1 = self.alias_nodes[node][0]
             n2 = self.alias_nodes[node][1]
             alias = alias_draw(n1, n2)
             next = node_neighbors[alias]
             result.append(next)
             result.append(next)
-        if steps_number % 2 == 1:
+        for _ in  range(steps_number % 4):
             n1 = self.alias_nodes[node][0]
             n2 = self.alias_nodes[node][1]
             alias = alias_draw(n1, n2)
@@ -90,13 +90,15 @@ class Graph:
         result = []
         # if steps_number/len(node_neighbors) > 1:
         #     print(steps_number/len(node_neighbors))
-        for _ in range(steps_number // 2):
+        for _ in range(steps_number // 4):
             n1, n2 = self.alias_edges[(pair[1], pair[0])]
             alias = alias_draw(n1, n2)
             next = node_neighbors[alias]
             result.append(next)
             result.append(next)
-        if steps_number % 2 == 1:
+            result.append(next)
+            result.append(next)
+        for _ in range(steps_number % 4):
             n1, n2 = self.alias_edges[(pair[1], pair[0])]
             alias = alias_draw(n1, n2)
             next = node_neighbors[alias]
