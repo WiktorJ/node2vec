@@ -42,16 +42,25 @@ class Graph:
 
     def draw_node(self, node, steps_number, node_neighbors):
         result = []
-        for _ in range(steps_number):
+        for _ in range(steps_number//2):
             n1 = self.alias_nodes[node][0]
             n2 = self.alias_nodes[node][1]
             alias = alias_draw(n1, n2)
             next = node_neighbors[alias]
             result.append(next)
+        if steps_number % 2 == 1:
+            n1 = self.alias_nodes[node][0]
+            n2 = self.alias_nodes[node][1]
+            alias = alias_draw(n1, n2)
+            next = node_neighbors[alias]
+            result.append(next)
+        np.random.shuffle(result)
         return result
 
     def draw_edge(self, pair, steps_number, node_neighbors):
         result = []
+        if steps_number/len(node_neighbors) > 1:
+            print(steps_number/len(node_neighbors))
         for _ in range(steps_number):
             n1, n2 = self.alias_edges[(pair[1], pair[0])]
             alias = alias_draw(n1, n2)
