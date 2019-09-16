@@ -78,7 +78,7 @@ class Graph:
             alias = alias_draw(n1, n2)
             next = node_neighbors[alias]
             result.append(next)
-        for _ in  range(steps_number % 1):
+        for _ in range(steps_number % 1):
             n1 = self.alias_nodes[node][0]
             n2 = self.alias_nodes[node][1]
             alias = alias_draw(n1, n2)
@@ -149,7 +149,8 @@ class Graph:
             while visit_dict:
                 (current_node, previous_node), walks = visit_dict.popitem()
                 cur_nbrs = self.neighbors[current_node]
-                self.edges_count[(current_node, previous_node)] = self.edges_count.get((current_node, previous_node), 0) + 1
+                self.edges_count[(current_node, previous_node)] = self.edges_count.get((current_node, previous_node),
+                                                                                       0) + len(walks)
                 if len(cur_nbrs) > 0:
                     if len(walks[0]) == 1:
                         drawn = self.draw_node(current_node, len(walks), cur_nbrs)
