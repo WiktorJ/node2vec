@@ -1,6 +1,7 @@
 import numpy as np
 import random
 from itertools import islice, chain
+import json
 
 
 class WalkAggregator:
@@ -149,8 +150,7 @@ class Graph:
             while visit_dict:
                 (current_node, previous_node), walks = visit_dict.popitem()
                 cur_nbrs = self.neighbors[current_node]
-                self.edges_count[(current_node, previous_node)] = self.edges_count.get((current_node, previous_node),
-                                                                                       0) + len(walks)
+                self.update_edges_count(current_node, previous_node, len(walks), len(walks[0]))
                 if len(cur_nbrs) > 0:
                     if len(walks[0]) == 1:
                         drawn = self.draw_node(current_node, len(walks), cur_nbrs)
@@ -163,6 +163,20 @@ class Graph:
             visit_dict, visit_dict_next = visit_dict_next, visit_dict
 
         return completed_walks
+
+    def update_edges_count(self, cur, prev, count, step):
+        key = str((cur, prev))
+        cur_count = self.edges_count.get(key)
+        if not cur_count:
+            self.edges_count[key] = {
+                "count": count,
+                "source_neighbors": len(self.neighbors[cur]),
+                "target_neighbors": len(self.neighbors[prev]) if self.neighbors.get(prev) else 0,
+                "time_access": {step: count}
+            }
+        else:
+            cur_count['count'] += count
+            cur_count['time_access'][step] = count
 
     def simulate_walks(self, num_walks, walk_length, concurrent_nodes=16):
         '''
@@ -180,7 +194,11 @@ class Graph:
             #         f"processed {i} chunks of {int(len(nodes) / concurrent_nodes)} in total. Chunk size: {concurrent_nodes}")
             start_nodes = list(node_chunk)
             walks += self.node2vec_walk(walk_length=walk_length, start_nodes=start_nodes, num_walks=num_walks)
-        print(self.edges_count)
+        print(json.dumps(
+            {"nodes": len(G.nodes()),
+             "edges": len(G.edges()),
+             "stats": self.edges_count}
+        ))
         return walks
 
     def get_alias_edge(self, src, dst):

@@ -96,7 +96,8 @@ res = {}
 
 print()
 print("Hash grouping")
-for el in [1, 4, 8, 16, 32, 64, 128, 512]:
+# for el in [1, 4, 8, 16, 32, 64, 128, 512]:
+for el in [128]:
     test(config, node2vec_ms_walk, el)
 
 # print()
