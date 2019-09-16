@@ -135,6 +135,18 @@ class Graph:
             visit_dict[(start_node, None)] = [[start_node] for _ in range(num_walks)]
 
         while visit_dict:
+            total = len(visit_dict)
+            more_2 = 0
+            more_3 = 0
+            more_4 = 0
+            for val in visit_dict.values():
+                if len(val) > 2:
+                    more_2 += 1
+                if len(val) > 3:
+                    more_3 += 1
+                if len(val) > 4:
+                    more_4 += 1
+            print(f"total: {total}, 2<: {more_2}, 3<: {more_3}, 4<: {more_4}")
             while visit_dict:
                 (current_node, previous_node), walks = visit_dict.popitem()
                 cur_nbrs = sorted(G.neighbors(current_node))
