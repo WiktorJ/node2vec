@@ -30,6 +30,7 @@ class Graph:
         self.p = p
         self.q = q
         self.neighbors = {}
+        self.edges_count = {}
         for node in self.G.nodes:
             self.neighbors[node] = sorted(self.G.neighbors(node))
 
@@ -70,14 +71,14 @@ class Graph:
 
     def draw_node(self, node, steps_number, node_neighbors):
         result = []
-        for _ in range(steps_number // 4):
+
+        for _ in range(steps_number // 1):
             n1 = self.alias_nodes[node][0]
             n2 = self.alias_nodes[node][1]
             alias = alias_draw(n1, n2)
             next = node_neighbors[alias]
             result.append(next)
-            result.append(next)
-        for _ in  range(steps_number % 4):
+        for _ in  range(steps_number % 1):
             n1 = self.alias_nodes[node][0]
             n2 = self.alias_nodes[node][1]
             alias = alias_draw(n1, n2)
@@ -90,15 +91,12 @@ class Graph:
         result = []
         # if steps_number/len(node_neighbors) > 1:
         #     print(steps_number/len(node_neighbors))
-        for _ in range(steps_number // 4):
+        for _ in range(steps_number // 1):
             n1, n2 = self.alias_edges[(pair[1], pair[0])]
             alias = alias_draw(n1, n2)
             next = node_neighbors[alias]
             result.append(next)
-            result.append(next)
-            result.append(next)
-            result.append(next)
-        for _ in range(steps_number % 4):
+        for _ in range(steps_number % 1):
             n1, n2 = self.alias_edges[(pair[1], pair[0])]
             alias = alias_draw(n1, n2)
             next = node_neighbors[alias]
@@ -128,6 +126,7 @@ class Graph:
 
         visit_dict = {}
         visit_dict_next = {}
+
         completed_walks = []
         G = self.G
 
@@ -135,22 +134,22 @@ class Graph:
             visit_dict[(start_node, None)] = [[start_node] for _ in range(num_walks)]
 
         while visit_dict:
-            total = len(visit_dict)
-            more_2 = 0
-            more_3 = 0
-            more_4 = 0
-            for val in visit_dict.values():
-                if len(val) > 2:
-                    more_2 += 1
-                if len(val) > 3:
-                    more_3 += 1
-                if len(val) > 4:
-                    more_4 += 1
-            print(f"total: {total}, 2<: {more_2}, 3<: {more_3}, 4<: {more_4}")
+            # total = len(visit_dict)
+            # more_2 = 0
+            # more_3 = 0
+            # more_4 = 0
+            # for val in visit_dict.values():
+            #     if len(val) > 2:
+            #         more_2 += 1
+            #     if len(val) > 3:
+            #         more_3 += 1
+            #     if len(val) > 4:
+            #         more_4 += 1
+            # print(f"total: {total}, 2<: {more_2}, 3<: {more_3}, 4<: {more_4}")
             while visit_dict:
                 (current_node, previous_node), walks = visit_dict.popitem()
-                cur_nbrs = sorted(G.neighbors(current_node))
-
+                cur_nbrs = self.neighbors[current_node]
+                self.edges_count[(current_node, previous_node)] = self.edges_count.get((current_node, previous_node), 0) + 1
                 if len(cur_nbrs) > 0:
                     if len(walks[0]) == 1:
                         drawn = self.draw_node(current_node, len(walks), cur_nbrs)
@@ -180,6 +179,7 @@ class Graph:
             #         f"processed {i} chunks of {int(len(nodes) / concurrent_nodes)} in total. Chunk size: {concurrent_nodes}")
             start_nodes = list(node_chunk)
             walks += self.node2vec_walk(walk_length=walk_length, start_nodes=start_nodes, num_walks=num_walks)
+        print(self.edges_count)
         return walks
 
     def get_alias_edge(self, src, dst):
