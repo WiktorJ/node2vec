@@ -200,7 +200,7 @@ class Graph:
              "stats": self.edges_count},
             indent=1
         )
-        with open("stats.json", 'w') as stat_file:
+        with open(f"stats_{num_walks}_{walk_length}_{concurrent_nodes}.json", 'w') as stat_file:
             stat_file.write(stats)
         return walks
 
