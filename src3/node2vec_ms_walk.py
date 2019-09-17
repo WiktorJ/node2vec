@@ -194,11 +194,14 @@ class Graph:
             #         f"processed {i} chunks of {int(len(nodes) / concurrent_nodes)} in total. Chunk size: {concurrent_nodes}")
             start_nodes = list(node_chunk)
             walks += self.node2vec_walk(walk_length=walk_length, start_nodes=start_nodes, num_walks=num_walks)
-        print(json.dumps(
+        stats = json.dumps(
             {"nodes": len(G.nodes()),
              "edges": len(G.edges()),
-             "stats": self.edges_count}
-        ))
+             "stats": self.edges_count},
+            indent=1
+        )
+        with open("stats.json", 'w') as stat_file:
+            stat_file.write(stats)
         return walks
 
     def get_alias_edge(self, src, dst):
