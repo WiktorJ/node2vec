@@ -24,7 +24,7 @@ class WalkAggregator:
 
 class Graph:
 
-    def __init__(self, nx_G, is_directed, p, q):
+    def __init__(self, nx_G, is_directed, p, q, log_stats=False):
         self.G = nx_G
         self.is_directed = is_directed
         self.p = p

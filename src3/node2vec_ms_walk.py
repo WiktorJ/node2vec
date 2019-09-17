@@ -25,7 +25,7 @@ class WalkAggregator:
 
 class Graph:
 
-    def __init__(self, nx_G, is_directed, p, q):
+    def __init__(self, nx_G, is_directed, p, q, log_stats=False):
         self.G = nx_G
         self.is_directed = is_directed
         self.p = p
@@ -34,6 +34,7 @@ class Graph:
         self.edges_count = {}
         for node in self.G.nodes:
             self.neighbors[node] = sorted(self.G.neighbors(node))
+        self.log_stats = log_stats
 
     def neighbor_chunker(self, n):
         neighbors = set(self.neighbors.keys())
@@ -109,7 +110,7 @@ class Graph:
         # np.random.shuffle(drawn) consider if this is necessary (or some other way of randomizing the order).
         # Simply iterating drawn might introduce some bias
         for new_node in drawn:
-            new_pair = current_node, new_node
+            new_pair = new_node, current_node
             new_walk = walks.pop() + [new_node]
             if len(new_walk) == walk_len:
                 completed_walks.append(new_walk)
@@ -150,7 +151,8 @@ class Graph:
             while visit_dict:
                 (current_node, previous_node), walks = visit_dict.popitem()
                 cur_nbrs = self.neighbors[current_node]
-                self.update_edges_count(current_node, previous_node, len(walks), len(walks[0]))
+                if self.log_stats:
+                    self.update_edges_count(current_node, previous_node, len(walks), len(walks[0]))
                 if len(cur_nbrs) > 0:
                     if len(walks[0]) == 1:
                         drawn = self.draw_node(current_node, len(walks), cur_nbrs)
@@ -194,14 +196,15 @@ class Graph:
             #         f"processed {i} chunks of {int(len(nodes) / concurrent_nodes)} in total. Chunk size: {concurrent_nodes}")
             start_nodes = list(node_chunk)
             walks += self.node2vec_walk(walk_length=walk_length, start_nodes=start_nodes, num_walks=num_walks)
-        stats = json.dumps(
-            {"nodes": len(G.nodes()),
-             "edges": len(G.edges()),
-             "stats": self.edges_count},
-            indent=1
-        )
-        with open(f"stats_{num_walks}_{walk_length}_{concurrent_nodes}.json", 'w') as stat_file:
-            stat_file.write(stats)
+        if self.log_stats:
+            stats = json.dumps(
+                {"nodes": len(G.nodes()),
+                 "edges": len(G.edges()),
+                 "stats": self.edges_count},
+                indent=1
+            )
+            with open(f"stats_{num_walks}_{walk_length}_{concurrent_nodes}.json", 'w') as stat_file:
+                stat_file.write(stats)
         return walks
 
     def get_alias_edge(self, src, dst):
