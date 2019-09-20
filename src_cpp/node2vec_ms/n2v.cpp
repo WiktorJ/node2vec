@@ -16,34 +16,19 @@ void node2vec(PWNet &InNet, const double &ParamP, const double &ParamQ,
         NIdsV.Add(NI.GetId());
     }
     //Generate random walks
-//    int64 AllWalks = (int64) NumWalks * NIdsV.Len();
-    int64 AllWalks = (int64) NIdsV.Len();
+    int64 AllWalks = (int64) NumWalks * NIdsV.Len();
+//    int64 AllWalks = (int64) NIdsV.Len();
     WalksVV = TVVec<TInt, int64>(AllWalks, WalkLen);
     TRnd Rnd(time(NULL));
     int64 WalksDone = 0;
 
     for (int i = 0; i < NIdsV.Len(); ++i) {
-        if (Verbose && WalksDone % 10000 == 0) {
-//        if (Verbose) {
-            printf("\rWalking Progress: %.2lf%%", (double) WalksDone * 100 / (double) AllWalks);
-            printf("\rWalks done: %lld", WalksDone);
-            fflush(stdout);
-        }
-
         std::vector<int64> start_nodes;
         start_nodes.push_back(NIdsV[i]);
-        TIntV WalkV = SimulateWalk(InNet, start_nodes, WalkLen, NumWalks, Rnd);
-        for (int64 k = 0; k < WalkV.Len(); k++) {
-            WalksVV.PutXY(i, k, WalkV[k]);
-        }
-        WalksDone++;
+        int64 current_walk_number = i * WalkLen;
+        SimulateWalk(InNet, WalksVV, start_nodes, WalkLen, NumWalks, Rnd, current_walk_number);
     }
 
-//  if (Verbose) {
-//    printf("\n");
-//    fflush(stdout);
-//  }
-    //Learning embeddings
 
     auto walk_end_time = std::chrono::high_resolution_clock::now();
     if (!OutputWalks) {

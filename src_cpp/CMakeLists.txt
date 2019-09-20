@@ -3,7 +3,7 @@ project(node2vec)
 
 
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(SNAPROOT /Users/w.jurasz/Studies/GR/snap)
 set(GLIB  glib-core)
 set(SNAP  snap-core)

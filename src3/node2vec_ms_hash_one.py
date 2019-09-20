@@ -74,23 +74,36 @@ class Graph:
     def draw_node(self, node, steps_number, node_neighbors):
         result = []
 
-        n1 = self.alias_nodes[node][0]
-        n2 = self.alias_nodes[node][1]
-        for _ in range(steps_number):
+        for _ in range(steps_number // 1):
+            n1 = self.alias_nodes[node][0]
+            n2 = self.alias_nodes[node][1]
             alias = alias_draw(n1, n2)
             next = node_neighbors[alias]
             result.append(next)
+        for _ in range(steps_number % 1):
+            n1 = self.alias_nodes[node][0]
+            n2 = self.alias_nodes[node][1]
+            alias = alias_draw(n1, n2)
+            next = node_neighbors[alias]
+            result.append(next)
+        np.random.shuffle(result)
         return result
 
     def draw_edge(self, pair, steps_number, node_neighbors):
         result = []
         # if steps_number/len(node_neighbors) > 1:
         #     print(steps_number/len(node_neighbors))
-        n1, n2 = self.alias_edges[(pair[1], pair[0])]
-        for _ in range(steps_number):
+        for _ in range(steps_number // 1):
+            n1, n2 = self.alias_edges[(pair[1], pair[0])]
             alias = alias_draw(n1, n2)
             next = node_neighbors[alias]
             result.append(next)
+        for _ in range(steps_number % 1):
+            n1, n2 = self.alias_edges[(pair[1], pair[0])]
+            alias = alias_draw(n1, n2)
+            next = node_neighbors[alias]
+            result.append(next)
+        np.random.shuffle(result)
         return result
 
     def update_step(self, drawn, current_node, walks, visit_dict_next, completed_walks, walk_len):
@@ -120,11 +133,12 @@ class Graph:
         G = self.G
 
         for start_node in start_nodes:
-            visit_dict[(start_node, None)] = [[start_node] for _ in range(num_walks)]
+            visit_dict[start_node] = [[start_node] for _ in range(num_walks)]
 
         while visit_dict:
             while visit_dict:
-                (current_node, previous_node), walks = visit_dict.popitem()
+                current_node, walks = visit_dict.popitem()
+                previous_node = self.get_prev(walk)
                 cur_nbrs = self.neighbors[current_node]
                 if self.log_stats:
                     self.update_edges_count(current_node, previous_node, len(walks), len(walks[0]))
@@ -136,7 +150,7 @@ class Graph:
                         drawn = self.draw_edge((current_node, previous_node), len(walks), cur_nbrs)
                         self.update_step(drawn, current_node, walks, visit_dict_next, completed_walks, walk_length)
                 else:
-                    print("HANDLE NODE WITH NO NEIGHBORS")  # Probably just continue or add those walks to result
+                    print("HANDLE NODE WITH NO NEIGHBORS")  # Probably just continue
             visit_dict, visit_dict_next = visit_dict_next, visit_dict
 
         return completed_walks
@@ -165,6 +179,10 @@ class Graph:
         random.shuffle(nodes)
         i = 0
         for node_chunk in self.neighbor_chunker(concurrent_nodes):
+            # i += 1
+            # if i % 100 == 0:
+            #     print(
+            #         f"processed {i} chunks of {int(len(nodes) / concurrent_nodes)} in total. Chunk size: {concurrent_nodes}")
             start_nodes = list(node_chunk)
             walks += self.node2vec_walk(walk_length=walk_length, start_nodes=start_nodes, num_walks=num_walks)
         if self.log_stats:

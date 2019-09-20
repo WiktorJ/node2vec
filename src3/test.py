@@ -13,12 +13,12 @@ from distance import get_matrixs, calc_matrix_norm, cluster_distance
 config = {
     # 'input': '../graph/facebook_combined.edgelist',
     # 'input': '../graph/artist_edges.edgelist',
-    'input': '../graph/email-Eu-core.txt',
-    # 'input': '../graph/lesmis.edgelist',
+    # 'input': '../graph/email-Eu-core.txt',
+    'input': '../graph/lesmis.edgelist',
     # 'output': '../emb/lesmis{}.emb',
     'dimensions': 16,
     'walk_length': 20,
-    'num_walks': 20,
+    'num_walks': 50,
     'window_size': 10,
     'iter': 10,
     'workers': 8,
@@ -69,7 +69,7 @@ def test(config, impl, nc, log_stats=False):
     walks = G.simulate_walks(config['num_walks'], config['walk_length'], nc)
     walk_end = time.time()
     print(f"Walk Time: {walk_end - start}, Concurrent walks: {nc}")
-    # emb =learn_embeddings(walks, config)
+    emb =learn_embeddings(walks, config)
     # print(f"Emb Time: {time.time() - walk_end}")
     # print(f"Total Time: {time.time() - start}")
     # return emb
@@ -85,20 +85,20 @@ outputs_base = [('../emb/lesmis' + str(i + 1) + '.emb', "base_" + str(i + 1)) fo
                 range(test_count, 2 * test_count)]
 
 res = {}
-print("Base times")
+# print("Base times")
 for el in [1]:
     test(config, node2vec, el)
-#
+# #
 # print()
-print("No hash grouping")
-for el in [1,64,128,512]:
-    test(config, node2vec_ms, el)
+# print("No hash grouping")
+# for el in [128]:
+#     test(config, node2vec_ms, el)
 
-print()
-print("Hash grouping")
-for el in [1, 4, 8, 16, 32, 64, 128, 512, 1024, 2048]:
+# print()
+# print("Hash grouping")
+# for el in [1, 4, 8, 16, 32, 64, 128]:
 # for el in [1,16,64, 128]:
-    test(config, node2vec_ms_walk, el)
+#     test(config, node2vec_ms_walk, el)
 
 # print()
 # print("Hash grouping2")
