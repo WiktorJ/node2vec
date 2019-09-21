@@ -11,7 +11,6 @@ set(GLIBADV  glib-adv)
 set(SNAPADV  snap-adv)
 set(SOURCEROOT node2vec_ms)
 
-
 set(EXGLIB ${SNAPROOT}/${GLIB})
 set(EXSNAP ${SNAPROOT}/${SNAP})
 set(EXGLIBADV ${SNAPROOT}/${GLIBADV})

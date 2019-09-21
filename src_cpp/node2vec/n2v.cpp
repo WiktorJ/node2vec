@@ -21,7 +21,7 @@ void node2vec(PWNet &InNet, const double &ParamP, const double &ParamQ,
     int64 WalksDone = 0;
     for (int64 i = 0; i < NumWalks; i++) {
         NIdsV.Shuffle(Rnd);
-#pragma omp parallel for schedule(dynamic)
+//#pragma omp parallel for schedule(dynamic)
         for (int64 j = 0; j < NIdsV.Len(); j++) {
             if (Verbose && WalksDone % 10000 == 0) {
                 printf("\rWalking Progress: %.2lf%%", (double) WalksDone * 100 / (double) AllWalks);

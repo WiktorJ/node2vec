@@ -21,7 +21,7 @@ void node2vec(PWNet &InNet, const double &ParamP, const double &ParamQ,
     WalksVV = TVVec<TInt, int64>(AllWalks, WalkLen);
     TRnd Rnd(time(NULL));
     int64 WalksDone = 0;
-
+//#pragma omp parallel for schedule(dynamic)
     for (int i = 0; i < NIdsV.Len(); ++i) {
         std::vector<int64> start_nodes;
         start_nodes.push_back(NIdsV[i]);
