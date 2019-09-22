@@ -137,8 +137,8 @@ std::vector<int64> draw_edge(PWNet &InNet,
     std::vector<int64> drawn;
     drawn.reserve(steps_number);
     for (auto i = 0; i < steps_number; i++) {
-        auto rand_table = InNet->GetNDat(current_node).GetDat(previous_node);
-        drawn.push_back(InNet->GetNI(current_node).GetNbrNId(AliasDrawInt(rand_table, Rnd)));
+        drawn.push_back(InNet->GetNI(current_node).GetNbrNId(
+                AliasDrawInt(InNet->GetNDat(current_node).GetDat(previous_node), Rnd)));
     }
     return drawn;
 }
