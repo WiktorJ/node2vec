@@ -2,7 +2,6 @@
 #define N2V_H
 
 #include "stdafx.h"
-
 #include "Snap.h"
 #include "biasedrandomwalk.h"
 #include "word2vec.h"

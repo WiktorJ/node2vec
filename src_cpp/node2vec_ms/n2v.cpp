@@ -23,10 +23,15 @@ void node2vec(PWNet &InNet, const double &ParamP, const double &ParamQ,
     int64 WalksDone = 0;
 //#pragma omp parallel for schedule(dynamic)
     for (int i = 0; i < NIdsV.Len(); ++i) {
+        if (Verbose && WalksDone % 10000 == 0) {
+            printf("\rWalking Progress: %.2lf%%", (double) WalksDone * 100 / (double) AllWalks);
+            fflush(stdout);
+        }
         std::vector<int64> start_nodes;
         start_nodes.push_back(NIdsV[i]);
-        int64 current_walk_number = i * WalkLen;
+        int64 current_walk_number = i * NumWalks;
         SimulateWalk(InNet, WalksVV, start_nodes, WalkLen, NumWalks, Rnd, current_walk_number);
+        WalksDone += NumWalks;
     }
 
 

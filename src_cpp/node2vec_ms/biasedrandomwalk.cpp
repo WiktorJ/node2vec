@@ -174,9 +174,10 @@ void SimulateWalk(PWNet &InNet,
     std::unordered_map<std::pair<int64, int64>, std::vector<int64>, pair_hash> visit;
     std::unordered_map<std::pair<int64, int64>, std::vector<int64>, pair_hash> visit_next;
     for (auto &node: StartNIds) {
-        if (InNet->GetNI(node).GetOutDeg() != 0) {
+        auto node_iterator = InNet->GetNI(node);
+        if (node_iterator.GetOutDeg() != 0) {
             for (auto i = 0; i < NumWalk; i++) {
-                auto current_node = InNet->GetNI(node).GetNbrNId(Rnd.GetUniDevInt(InNet->GetNI(node).GetOutDeg()));
+                auto current_node =node_iterator.GetNbrNId(Rnd.GetUniDevInt(node_iterator.GetOutDeg()));
                 auto pair = std::make_pair(node, current_node);
                 visit[pair].push_back(current_walk_number); // New entry is created if doesn't exist
                 WalksVV.PutXY(current_walk_number, 0, node);
@@ -195,8 +196,15 @@ void SimulateWalk(PWNet &InNet,
             auto previous_node = it->first.first;
             auto current_node = it->first.second;
             auto indexes = it->second;
-            if (InNet->GetNI(current_node).GetOutDeg() != 0) {
-                auto drawn = draw_edge(InNet, current_node, previous_node, Rnd, indexes.size());
+            auto node_iterator = InNet->GetNI(current_node);
+            if (node_iterator.GetOutDeg() != 0) {
+                auto steps_number = indexes.size();
+                std::vector<int64> drawn;
+                drawn.reserve(steps_number);
+                for (auto i = 0; i < steps_number; i++) {
+                    drawn.push_back(node_iterator.GetNbrNId(
+                            AliasDrawInt(InNet->GetNDat(current_node).GetDat(previous_node), Rnd)));
+                }
                 update_step(drawn, current_node, WalksVV, visit_next, indexes, WalkLen, current_length);
             }
             ++next_it;

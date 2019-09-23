@@ -114,6 +114,6 @@ int main(int argc, char *argv[]) {
     ReadGraph(InFile, Directed, Weighted, Verbose, InNet);
     node2vec(InNet, ParamP, ParamQ, Dimensions, WalkLen, NumWalks, WinSize, Iter,
              Verbose, OutputWalks, WalksVV, EmbeddingsHV);
-    WriteOutput(OutFile, EmbeddingsHV, WalksVV, OutputWalks);
+//    WriteOutput(OutFile, EmbeddingsHV, WalksVV, OutputWalks);
     return 0;
 }
