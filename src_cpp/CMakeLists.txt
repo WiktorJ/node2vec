@@ -4,7 +4,7 @@ project(node2vec)
 
 
 set(CMAKE_CXX_STANDARD 20)
-set(SNAPROOT /Users/w.jurasz/Studies/GR/snap)
+set(SNAPROOT /home/wiktor/Studies/GR/snap)
 set(GLIB  glib-core)
 set(SNAP  snap-core)
 set(GLIBADV  glib-adv)
@@ -16,12 +16,17 @@ set(EXSNAP ${SNAPROOT}/${SNAP})
 set(EXGLIBADV ${SNAPROOT}/${GLIBADV})
 set(EXSNAPADV ${SNAPROOT}/${SNAPADV})
 
+#SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
+#SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
+#SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -pg")
+
 set(OBJS ${EXSNAP}/Snap.o )
 
 include_directories(${SOURCEROOT} ${EXGLIBADV} ${EXGLIB} ${EXSNAP} ${EXSNAPADV})
 
 add_subdirectory(node2vec_ms)
 add_subdirectory(node2vec)
+add_subdirectory(/home/wiktor/Studies/GR/hopscotch-map /home/wiktor/Studies/GR/hopscotch-map/build)
 
 SET_SOURCE_FILES_PROPERTIES(
         ${OBJS}
@@ -29,3 +34,9 @@ SET_SOURCE_FILES_PROPERTIES(
         EXTERNAL_OBJECT true
         GENERATED true
 )
+#find_package(OpenMP)
+#
+#set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+#set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+#set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+

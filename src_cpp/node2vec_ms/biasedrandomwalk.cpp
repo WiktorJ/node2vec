@@ -4,6 +4,11 @@
 #include <unordered_map>
 #include <tuple>
 #include <numeric>
+#include <tsl/hopscotch_map.h>
+
+#define BIT_SET(a,b) ((a) |= (1ULL<<(b)))
+#define BIT_CLEAR(a,b) ((a) &= ~(1ULL<<(b)))
+
 
 //Preprocess alias sampling method
 void GetNodeAlias(TFltV &PTblV, TIntVFltVPr &NTTable) {
@@ -124,8 +129,9 @@ void PreprocessTransitionProbs(PWNet &InNet, const double &ParamP, const double 
 struct pair_hash {
     template<class T1, class T2>
     std::size_t operator()(const std::pair<T1, T2> &pair) const {
-        const auto first_hash = std::hash<T1>{}(pair.first);
-        return first_hash ^ (std::hash<T2>{}(pair.second) + 0x9e3779b9 + (first_hash << 6) + (first_hash >> 2));
+//        const auto first_hash = std::hash<T1>{}(pair.first);
+//        return first_hash ^ (std::hash<T2>{}(pair.second) + 0x9e3779b9 + (first_hash << 6) + (first_hash >> 2));
+        return pair.first << 32 | pair.second;
     }
 };
 
@@ -143,20 +149,24 @@ std::vector<int64> draw_edge(PWNet &InNet,
     return drawn;
 }
 
-void update_step(std::vector<int64> &drawn,
-                 int64 current_node,
+void update_step(const int64 current_node,
+                 const int64 previous_node,
                  TVVec<TInt, int64> &WalksVV,
-                 std::unordered_map<std::pair<int64, int64>, std::vector<int64>, pair_hash> &visit_next,
-                 std::vector<int64> &indexes,
-                 int64 walk_length,
-                 int64 current_length) {
-
-    for (auto next_node: drawn) {
-        auto index = indexes.back();
+                 tsl::hopscotch_map<std::pair<int64, int64>, int64, pair_hash> &visit_next,
+                 int64 indexes,
+                 const int64 walk_length,
+                 const int64 current_length,
+                 const TWNet::TNodeI &node_iterator,
+                 const PWNet &InNet,
+                 TRnd &Rnd) {
+    while(indexes > 0) {
+        auto next_node = node_iterator.GetNbrNId(
+                AliasDrawInt(InNet->GetNDat(current_node).GetDat(previous_node), Rnd));
+        auto index = __builtin_ffsll(indexes) - 1;
+        BIT_CLEAR(indexes, index);
         if (current_length < walk_length - 1) {
-            visit_next[std::make_pair(current_node, next_node)].push_back(index);
+            BIT_SET(visit_next[std::make_pair(current_node, next_node)], index);
         }
-        indexes.pop_back();
         WalksVV.PutXY(index, current_length, next_node);
     }
 
@@ -166,20 +176,20 @@ void update_step(std::vector<int64> &drawn,
 //Simulates a random walk
 void SimulateWalk(PWNet &InNet,
                   TVVec<TInt, int64> &WalksVV,
-                  std::vector<int64> StartNIds,
+                  const std::vector<int64> &StartNIds,
                   const int &WalkLen,
                   const int &NumWalk,
                   TRnd &Rnd,
                   int64 current_walk_number) {
-    std::unordered_map<std::pair<int64, int64>, std::vector<int64>, pair_hash> visit;
-    std::unordered_map<std::pair<int64, int64>, std::vector<int64>, pair_hash> visit_next;
+    tsl::hopscotch_map<std::pair<int64, int64>, int64, pair_hash> visit;
+    tsl::hopscotch_map<std::pair<int64, int64>, int64, pair_hash> visit_next;
     for (auto &node: StartNIds) {
         auto node_iterator = InNet->GetNI(node);
         if (node_iterator.GetOutDeg() != 0) {
             for (auto i = 0; i < NumWalk; i++) {
                 auto current_node =node_iterator.GetNbrNId(Rnd.GetUniDevInt(node_iterator.GetOutDeg()));
                 auto pair = std::make_pair(node, current_node);
-                visit[pair].push_back(current_walk_number); // New entry is created if doesn't exist
+                BIT_SET(visit[pair], current_walk_number);
                 WalksVV.PutXY(current_walk_number, 0, node);
                 WalksVV.PutXY(current_walk_number, 1, current_node);
                 current_walk_number++;
@@ -192,24 +202,15 @@ void SimulateWalk(PWNet &InNet,
     }
     int64 current_length = 2;
     while (!visit.empty()) {
-        for (auto it = visit.cbegin(), next_it = it; it != visit.cend(); it = next_it) {
-            auto previous_node = it->first.first;
-            auto current_node = it->first.second;
-            auto indexes = it->second;
+        for (auto &[key, indexes]: visit) {
+            auto previous_node = key.first;
+            auto current_node = key.second;
             auto node_iterator = InNet->GetNI(current_node);
             if (node_iterator.GetOutDeg() != 0) {
-                auto steps_number = indexes.size();
-                std::vector<int64> drawn;
-                drawn.reserve(steps_number);
-                for (auto i = 0; i < steps_number; i++) {
-                    drawn.push_back(node_iterator.GetNbrNId(
-                            AliasDrawInt(InNet->GetNDat(current_node).GetDat(previous_node), Rnd)));
-                }
-                update_step(drawn, current_node, WalksVV, visit_next, indexes, WalkLen, current_length);
+                update_step(current_node, previous_node, WalksVV, visit_next, indexes, WalkLen, current_length, node_iterator, InNet, Rnd);
             }
-            ++next_it;
-            visit.erase(it);
         }
+        visit.clear();
         current_length++;
         std::swap(visit, visit_next);
     }
