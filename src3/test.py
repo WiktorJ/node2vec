@@ -13,8 +13,8 @@ from distance import get_matrixs, calc_matrix_norm, cluster_distance
 config = {
     # 'input': '../graph/facebook_combined.edgelist',
     # 'input': '../graph/artist_edges.edgelist',
-    'input': '../graph/email-Eu-core.txt',
-    # 'input': '../graph/lesmis.edgelist',
+    # 'input': '../graph/email-Eu-core.txt',
+    'input': '../graph/lesmis.edgelist',
     # 'output': '../emb/lesmis{}.emb',
     'dimensions': 16,
     'walk_length': 80,
@@ -84,21 +84,21 @@ outputs_ms = [('../emb/lesmis' + str(i + 1) + '.emb', "MS_" + str(i + 1)) for i 
 outputs_base = [('../emb/lesmis' + str(i + 1) + '.emb', "base_" + str(i + 1)) for i in
                 range(test_count, 2 * test_count)]
 
-res = {}
-print("Base times")
-for el in [1]:
-    test(config, node2vec, el)
+# res = {}
+# print("Base times")
+# for el in [1]:
+#     test(config, node2vec, el)
 # #
-print()
-print("No hash grouping")
-for el in [1]:
-    test(config, node2vec_ms, el)
+# print()
+# print("No hash grouping")
+# for el in [1]:
+#     test(config, node2vec_ms, el)
 
-print()
-print("Hash grouping")
+# print()
+# print("Hash grouping")
 # for el in [1, 4, 8, 16, 32, 64, 128]:
 for el in [1]:
-    test(config, node2vec_ms_walk, el)
+    test(config, node2vec_ms_walk, el, True)
 
 # print()
 # print("Hash grouping2")

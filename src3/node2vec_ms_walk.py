@@ -108,7 +108,7 @@ class Graph:
     def get_prev(self, walk):
         return walk[-2] if len(walk) > 1 else -1
 
-    def node2vec_walk(self, walk_length, start_nodes, num_walks):
+    def node2vec_walk(self, walk_length, start_nodes, num_walks, batch_id):
         '''
         Simulate a random walk starting from start node.
         '''
@@ -121,13 +121,12 @@ class Graph:
 
         for start_node in start_nodes:
             visit_dict[(start_node, None)] = [[start_node] for _ in range(num_walks)]
-
         while visit_dict:
             while visit_dict:
                 (current_node, previous_node), walks = visit_dict.popitem()
                 cur_nbrs = self.neighbors[current_node]
                 if self.log_stats:
-                    self.update_edges_count(current_node, previous_node, len(walks), len(walks[0]))
+                    self.update_edges_count(current_node, previous_node, len(walks), len(walks[0]), walks[0][0], batch_id)
                 if len(cur_nbrs) > 0:
                     if len(walks[0]) == 1:
                         drawn = self.draw_node(current_node, len(walks), cur_nbrs)
@@ -141,7 +140,7 @@ class Graph:
 
         return completed_walks
 
-    def update_edges_count(self, cur, prev, count, step):
+    def update_edges_count(self, cur, prev, count, step, starting_node, batch_id):
         key = str((cur, prev))
         cur_count = self.edges_count.get(key)
         if not cur_count:
@@ -149,11 +148,15 @@ class Graph:
                 "count": count,
                 "source_neighbors": len(self.neighbors[cur]),
                 "target_neighbors": len(self.neighbors[prev]) if self.neighbors.get(prev) else 0,
-                "time_access": {step: count}
+                "time_access": {step: count},
+                "starting_nodes": {starting_node: 1},
+                "batch_id": {batch_id: 1}
             }
         else:
             cur_count['count'] += count
             cur_count['time_access'][step] = count
+            cur_count['starting_nodes'][starting_node] = cur_count['starting_nodes'].get(starting_node, 0) + 1
+            cur_count['batch_id'][batch_id] = cur_count['batch_id'].get(batch_id, 0) + 1
 
     def simulate_walks(self, num_walks, walk_length, concurrent_nodes=16):
         '''
@@ -163,10 +166,12 @@ class Graph:
         walks = []
         nodes = list(G.nodes())
         random.shuffle(nodes)
-        i = 0
+        batch = 0
         for node_chunk in self.neighbor_chunker(concurrent_nodes):
             start_nodes = list(node_chunk)
-            walks += self.node2vec_walk(walk_length=walk_length, start_nodes=start_nodes, num_walks=num_walks)
+            walks += self.node2vec_walk(walk_length=walk_length, start_nodes=start_nodes, num_walks=num_walks, batch_id=batch)
+            batch += 1
+
         if self.log_stats:
             stats = json.dumps(
                 {"nodes": len(G.nodes()),
