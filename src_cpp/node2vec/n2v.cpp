@@ -10,6 +10,7 @@ void node2vec(PWNet &InNet, const double &ParamP, const double &ParamQ,
     auto start_time = std::chrono::high_resolution_clock::now();
     //Preprocess transition probabilities
     PreprocessTransitionProbs(InNet, ParamP, ParamQ, Verbose);
+    auto walk_start_time = std::chrono::high_resolution_clock::now();
     TIntV NIdsV;
     for (TWNet::TNodeI NI = InNet->BegNI(); NI < InNet->EndNI(); NI++) {
         NIdsV.Add(NI.GetId());
@@ -46,8 +47,10 @@ void node2vec(PWNet &InNet, const double &ParamP, const double &ParamQ,
         LearnEmbeddings(WalksVV, Dimensions, WinSize, Iter, Verbose, EmbeddingsHV);
         auto learn_end_time = std::chrono::high_resolution_clock::now();
     }
-    printf("\rWalk time: %lld ms",
+    printf("\rWalk time: %ld ms, Total time: %ld ms",
+           std::chrono::duration_cast<std::chrono::milliseconds>(walk_end_time - walk_start_time).count(),
            std::chrono::duration_cast<std::chrono::milliseconds>(walk_end_time - start_time).count());
+    fflush(stdout);
 }
 
 void node2vec(PWNet &InNet, const double &ParamP, const double &ParamQ,

@@ -10,9 +10,20 @@ typedef TPt<TWNet> PWNet;
 void PreprocessTransitionProbs(PWNet& InNet, const double& ParamP, const double& ParamQ, const bool& verbose);
 
 ///Simulates one walk and writes it into Walk vector
-void SimulateWalk(PWNet& InNet, TVVec<TInt, int64> &WalksVV,const std::vector<int64> &StartNId, const int& WalkLen, const int& NumWalk, TRnd& Rnd, int64 current_walk_number);
+void SimulateWalk(PWNet& InNet,
+        TVVec<TInt, uint64> &WalksVV,
+        const std::vector<uint64> &StartNId,
+        const int& WalkLen,
+        const int& NumWalk,
+        TRnd& Rnd,
+        uint64 current_walk_offset,
+        std::vector<uint64> previous_nodes,
+        std::vector<uint64> current_nodes);
+
+
+
 
 //Predicts approximate memory required for preprocessing the graph
-int64 PredictMemoryRequirements(PWNet& InNet);
+uint64 PredictMemoryRequirements(PWNet& InNet);
 
 #endif //RAND_WALK_H
