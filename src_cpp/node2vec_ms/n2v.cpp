@@ -2,6 +2,8 @@
 #include "stdafx.h"
 #include "n2v.h"
 #include "vector"
+#include <unordered_map>
+#include <map>
 
 void node2vec(PWNet &InNet, const double &ParamP, const double &ParamQ,
               const int &Dimensions, const int &WalkLen, const int &NumWalks,
@@ -24,7 +26,7 @@ void node2vec(PWNet &InNet, const double &ParamP, const double &ParamQ,
     auto node_count = InNet->GetNodes();
     std::vector<uint64> previous_node(node_count, 0);
     std::vector<uint64> current_node(node_count, 0);
-
+    std::map<int64, int64> stats;
 //#pragma omp parallel for schedule(dynamic)
     uint64 bit_field_size = 64;
     uint64 current_walk_number = 0;
@@ -39,11 +41,11 @@ void node2vec(PWNet &InNet, const double &ParamP, const double &ParamQ,
         while (walks_left > 0) {
             if (walks_left > bit_field_size) {
                 SimulateWalk(InNet, WalksVV, start_nodes, WalkLen, bit_field_size, Rnd, current_walk_number, previous_node,
-                             current_node);
+                             current_node, stats);
                 current_walk_number += bit_field_size;
             } else {
                 SimulateWalk(InNet, WalksVV, start_nodes, WalkLen, walks_left, Rnd, current_walk_number, previous_node,
-                             current_node);
+                             current_node, stats);
                 current_walk_number += + walks_left;
             }
             walks_left -= bit_field_size;
@@ -52,14 +54,18 @@ void node2vec(PWNet &InNet, const double &ParamP, const double &ParamQ,
 
 
     auto walk_end_time = std::chrono::high_resolution_clock::now();
-//    if (!OutputWalks) {
-//        LearnEmbeddings(WalksVV, Dimensions, WinSize, Iter, Verbose, EmbeddingsHV);
-//        auto learn_end_time = std::chrono::high_resolution_clock::now();
-//    }
+    if (!OutputWalks) {
+        LearnEmbeddings(WalksVV, Dimensions, WinSize, Iter, Verbose, EmbeddingsHV);
+        auto learn_end_time = std::chrono::high_resolution_clock::now();
+    }
     printf("\rWalk time: %ld ms, Total time: %ld ms",
            std::chrono::duration_cast<std::chrono::milliseconds>(walk_end_time - walk_start_time).count(),
            std::chrono::duration_cast<std::chrono::milliseconds>(walk_end_time - start_time).count());
     fflush(stdout);
+//    for(auto const &[key, value] : stats) {
+//        printf("\n%ld: %ld", key, value);
+//        fflush(stdout);
+//    }
 }
 
 void node2vec(PWNet &InNet, const double &ParamP, const double &ParamQ,

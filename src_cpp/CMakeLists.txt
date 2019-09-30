@@ -24,6 +24,7 @@ set(OBJS ${EXSNAP}/Snap.o )
 
 include_directories(${SOURCEROOT} ${EXGLIBADV} ${EXGLIB} ${EXSNAP} ${EXSNAPADV})
 
+add_subdirectory(node2vec_ms_bias)
 add_subdirectory(node2vec_ms)
 add_subdirectory(node2vec)
 add_subdirectory(/home/wiktor/Studies/GR/hopscotch-map /home/wiktor/Studies/GR/hopscotch-map/build)

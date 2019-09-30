@@ -3,6 +3,8 @@
 #include <base.h>
 #include "network.h"
 #include "vector"
+#include "unordered_map"
+#include "map"
 typedef TNodeEDatNet<TIntIntVFltVPrH, TFlt> TWNet;
 typedef TPt<TWNet> PWNet;
 
@@ -17,8 +19,9 @@ void SimulateWalk(PWNet& InNet,
         const int& NumWalk,
         TRnd& Rnd,
         uint64 current_walk_offset,
-        std::vector<uint64> previous_nodes,
-        std::vector<uint64> current_nodes);
+        std::vector<uint64> &previous_nodes,
+        std::vector<uint64> &current_nodes,
+        std::map<int64, int64> &stats);
 
 
 
