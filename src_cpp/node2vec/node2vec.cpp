@@ -9,7 +9,7 @@
 void ParseArgs(int &argc, char *argv[], TStr &InFile, TStr &OutFile,
                int &Dimensions, int &WalkLen, int &NumWalks, int &WinSize, int &Iter,
                bool &Verbose, double &ParamP, double &ParamQ, bool &Directed, bool &Weighted,
-               bool &OutputWalks) {
+               bool &OutputWalks, bool &dry_run) {
     Env = TEnv(argc, argv, TNotify::StdNotify);
     Env.PrepArgs(TStr::Fmt("\nAn algorithmic framework for representational learning on graphs."));
     InFile = Env.GetIfArgPrefixStr("-i:", "graph/karate.edgelist",
@@ -34,11 +34,12 @@ void ParseArgs(int &argc, char *argv[], TStr &InFile, TStr &OutFile,
     Directed = Env.IsArgStr("-dr", "Graph is directed.");
     Weighted = Env.IsArgStr("-w", "Graph is weighted.");
     OutputWalks = Env.IsArgStr("-ow", "Output random walks instead of embeddings.");
+    dry_run = Env.IsArgStr("-dr", "Dry run - execute without writing any output");
 }
 
 void ReadGraph(TStr &InFile, bool &Directed, bool &Weighted, bool &Verbose, PWNet &InNet) {
     TFIn FIn(InFile);
-    int64 LineCnt = 0;
+    uint64 LineCnt = 0;
     try {
         while (!FIn.Eof()) {
             TStr Ln;
@@ -48,8 +49,8 @@ void ReadGraph(TStr &InFile, bool &Directed, bool &Weighted, bool &Verbose, PWNe
             TStrV Tokens;
             Line.SplitOnWs(Tokens);
             if (Tokens.Len() < 2) { continue; }
-            int64 SrcNId = Tokens[0].GetInt();
-            int64 DstNId = Tokens[1].GetInt();
+            uint64 SrcNId = Tokens[0].GetInt();
+            uint64 DstNId = Tokens[1].GetInt();
             double Weight = 1.0;
             if (Weighted) { Weight = Tokens[2].GetFlt(); }
             if (!InNet->IsNode(SrcNId)) { InNet->AddNode(SrcNId); }
@@ -67,12 +68,12 @@ void ReadGraph(TStr &InFile, bool &Directed, bool &Weighted, bool &Verbose, PWNe
     }
 }
 
-void WriteOutput(TStr &OutFile, TIntFltVH &EmbeddingsHV, TVVec <TInt, int64> &WalksVV,
+void WriteOutput(TStr &OutFile, TIntFltVH &EmbeddingsHV, TVVec<TInt, uint64> &WalksVV,
                  bool &OutputWalks) {
     TFOut FOut(OutFile);
     if (OutputWalks) {
-        for (int64 i = 0; i < WalksVV.GetXDim(); i++) {
-            for (int64 j = 0; j < WalksVV.GetYDim(); j++) {
+        for (uint64 i = 0; i < WalksVV.GetXDim(); i++) {
+            for (uint64 j = 0; j < WalksVV.GetYDim(); j++) {
                 FOut.PutInt(WalksVV(i, j));
                 if (j + 1 == WalksVV.GetYDim()) {
                     FOut.PutLn();
@@ -93,7 +94,7 @@ void WriteOutput(TStr &OutFile, TIntFltVH &EmbeddingsHV, TVVec <TInt, int64> &Wa
             First = 0;
         }
         FOut.PutInt(EmbeddingsHV.GetKey(i));
-        for (int64 j = 0; j < EmbeddingsHV[i].Len(); j++) {
+        for (uint64 j = 0; j < EmbeddingsHV[i].Len(); j++) {
             FOut.PutCh(' ');
             FOut.PutFlt(EmbeddingsHV[i][j]);
         }
@@ -105,15 +106,18 @@ int main(int argc, char *argv[]) {
     TStr InFile, OutFile;
     int Dimensions, WalkLen, NumWalks, WinSize, Iter;
     double ParamP, ParamQ;
-    bool Directed, Weighted, Verbose, OutputWalks;
+    bool Directed, Weighted, Verbose, OutputWalks, dry_run;
     ParseArgs(argc, argv, InFile, OutFile, Dimensions, WalkLen, NumWalks, WinSize,
-              Iter, Verbose, ParamP, ParamQ, Directed, Weighted, OutputWalks);
+              Iter, Verbose, ParamP, ParamQ, Directed, Weighted, OutputWalks,
+              dry_run);
     PWNet InNet = PWNet::New();
     TIntFltVH EmbeddingsHV;
-    TVVec <TInt, int64> WalksVV;
+    TVVec<TInt, uint64> WalksVV;
     ReadGraph(InFile, Directed, Weighted, Verbose, InNet);
     node2vec(InNet, ParamP, ParamQ, Dimensions, WalkLen, NumWalks, WinSize, Iter,
              Verbose, OutputWalks, WalksVV, EmbeddingsHV);
-//    WriteOutput(OutFile, EmbeddingsHV, WalksVV, OutputWalks);
+    if (~dry_run) {
+        WriteOutput(OutFile, EmbeddingsHV, WalksVV, OutputWalks);
+    }
     return 0;
 }
