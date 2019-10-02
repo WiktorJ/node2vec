@@ -118,7 +118,7 @@ int main(int argc, char *argv[]) {
     TVVec<TInt, uint64> WalksVV;
     ReadGraph(InFile, Directed, Weighted, Verbose, InNet);
     node2vec(InNet, ParamP, ParamQ, Dimensions, WalkLen, NumWalks, WinSize, Iter,
-             Verbose, OutputWalks, WalksVV, EmbeddingsHV, reduced_bias);
+             Verbose, OutputWalks, WalksVV, EmbeddingsHV, reuse_probability, reduced_bias);
     if (~dry_run) {
         WriteOutput(OutFile, EmbeddingsHV, WalksVV, OutputWalks);
     }

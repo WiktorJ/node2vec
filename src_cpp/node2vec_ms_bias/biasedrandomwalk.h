@@ -24,23 +24,25 @@ void SimulateWalk(PWNet &InNet,
                   std::vector<uint64> &previous_nodes,
                   std::vector<uint64> &current_nodes,
                   std::vector<uint64> &saved_step,
-                  std::map<int64, int64> &stats);
-
+                  std::map<int64, int64> &stats,
+                  const double &reuse_prob);
 
 
 ///Simulates one walk and writes it into Walk vector
 void SimulateWalkReducedBias(PWNet &InNet,
-                  TVVec<TInt, uint64> &WalksVV,
-                  const std::vector<uint64> &StartNId,
-                  const int &WalkLen,
-                  const int &NumWalk,
-                  TRnd &Rnd,
-                  uint64 current_walk_offset,
-                  std::vector<uint64> &previous_nodes,
-                  std::vector<uint64> &current_nodes,
-                  std::vector<uint64> &saved_step,
-                  std::vector<bool> &is_dist_1,
-                  std::map<int64, int64> &stats);
+                             TVVec<TInt, uint64> &WalksVV,
+                             const std::vector<uint64> &StartNId,
+                             const int &WalkLen,
+                             const int &NumWalk,
+                             TRnd &Rnd,
+                             uint64 current_walk_offset,
+                             std::vector<uint64> &previous_nodes,
+                             std::vector<uint64> &current_nodes,
+                             std::vector<uint64> &saved_step,
+                             std::vector<bool> &is_dist_1,
+                             std::map<int64, int64> &stats,
+                             const double &reuse_prob);
+
 //Predicts approximate memory required for preprocessing the graph
 uint64 PredictMemoryRequirements(PWNet &InNet);
 

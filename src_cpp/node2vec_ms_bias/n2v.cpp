@@ -9,7 +9,7 @@ void node2vec(PWNet &InNet, const double &ParamP, const double &ParamQ,
               const int &Dimensions, const int &WalkLen, const int &NumWalks,
               const int &WinSize, const int &Iter, const bool &Verbose,
               const bool &OutputWalks, TVVec<TInt, uint64> &WalksVV,
-              TIntFltVH &EmbeddingsHV, const bool &reduced_bias) {
+              TIntFltVH &EmbeddingsHV, const double &reuse_prob, const bool &reduced_bias) {
     auto start_time = std::chrono::high_resolution_clock::now();
     //Preprocess transition probabilities
     PreprocessTransitionProbs(InNet, ParamP, ParamQ, Verbose);
@@ -44,7 +44,7 @@ void node2vec(PWNet &InNet, const double &ParamP, const double &ParamQ,
             while (walks_left > 0) {
                 auto walks_count = walks_left > bit_field_size ? bit_field_size : walks_left;
                 SimulateWalkReducedBias(InNet, WalksVV, start_nodes, WalkLen, walks_count, Rnd, current_walk_number, previous_node,
-                             current_node, saved_step, is_dist_1, stats);
+                             current_node, saved_step, is_dist_1, stats, reuse_prob);
                 current_walk_number += walks_count;
                 walks_left -= bit_field_size;
             }
@@ -61,7 +61,7 @@ void node2vec(PWNet &InNet, const double &ParamP, const double &ParamQ,
             while (walks_left > 0) {
                 auto walks_count = walks_left > bit_field_size ? bit_field_size : walks_left;
                 SimulateWalk(InNet, WalksVV, start_nodes, WalkLen, walks_count, Rnd, current_walk_number, previous_node,
-                             current_node, saved_step, stats);
+                             current_node, saved_step, stats, reuse_prob);
                 current_walk_number += walks_count;
                 walks_left -= bit_field_size;
             }

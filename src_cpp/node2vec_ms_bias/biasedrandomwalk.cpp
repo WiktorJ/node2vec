@@ -11,8 +11,6 @@
 #define BIT_SET(a, b) ((a) |= (1ULL<<(b)))
 #define BIT_CLEAR(a, b) ((a) &= ~(1ULL<<(b)))
 
-double reuse_prob = 0.8;
-
 //Preprocess alias sampling method
 void GetNodeAlias(TFltV &PTblV, TIntVFltVPr &NTTable) {
     uint64 N = PTblV.Len();
@@ -140,7 +138,8 @@ void SimulateWalk(PWNet &InNet,
                   std::vector<uint64> &previous_nodes,
                   std::vector<uint64> &current_nodes,
                   std::vector<uint64> &saved_step,
-                  std::map<int64, int64> &stats) {
+                  std::map<int64, int64> &stats,
+                  const double &reuse_prob) {
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<> dis(0, 1);
@@ -185,8 +184,7 @@ void SimulateWalk(PWNet &InNet,
                     while (indexes > 0) {
 //                        c++;
                         int64 next_node;
-
-                        if (dis(gen) < reuse_prob && saved_step[current_node] != -1) {
+                        if (saved_step[current_node] != -1 && dis(gen) < reuse_prob) {
                             next_node = saved_step[current_node];
                         } else {
                             if (cur_data == nullptr) {
@@ -231,7 +229,8 @@ void SimulateWalkReducedBias(PWNet &InNet,
                              std::vector<uint64> &current_nodes,
                              std::vector<uint64> &saved_step,
                              std::vector<bool> &is_dist_1,
-                             std::map<int64, int64> &stats) {
+                             std::map<int64, int64> &stats,
+                             const double &reuse_prob) {
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<> dis(0, 1);

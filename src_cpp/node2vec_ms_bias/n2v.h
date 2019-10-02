@@ -11,6 +11,6 @@ void node2vec(PWNet& InNet, const double& ParamP, const double& ParamQ,
   const int& Dimensions, const int& WalkLen, const int& NumWalks,
   const int& WinSize, const int& Iter, const bool& Verbose,
   const bool& OutputWalks, TVVec<TInt, uint64>& WalksVV,
-  TIntFltVH& EmbeddingsHV, const bool &reduced_bias);
+  TIntFltVH& EmbeddingsHV, const double &reuse_prob, const bool &reduced_bias);
 
 #endif
