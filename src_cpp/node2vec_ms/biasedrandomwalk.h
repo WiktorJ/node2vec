@@ -5,9 +5,9 @@
 #include "vector"
 #include "unordered_map"
 #include "map"
+#include <boost/multiprecision/cpp_int.hpp>
 typedef TNodeEDatNet<TIntIntVFltVPrH, TFlt> TWNet;
 typedef TPt<TWNet> PWNet;
-
 ///Preprocesses transition probabilities for random walks. Has to be called once before SimulateWalk calls
 void PreprocessTransitionProbs(PWNet& InNet, const double& ParamP, const double& ParamQ, const bool& verbose);
 

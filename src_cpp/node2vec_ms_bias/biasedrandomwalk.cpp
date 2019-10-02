@@ -7,9 +7,6 @@
 #include <deque>
 #include <random>
 
-#define BIT_SET(a, b) ((a) |= (1ULL<<(b)))
-#define BIT_CLEAR(a, b) ((a) &= ~(1ULL<<(b)))
-
 //Preprocess alias sampling method
 void GetNodeAlias(TFltV &PTblV, TIntVFltVPr &NTTable) {
     uint64 N = PTblV.Len();
@@ -126,95 +123,6 @@ void PreprocessTransitionProbs(PWNet &InNet, const double &ParamP, const double 
     if (Verbose) { printf("\n"); }
 }
 
-//Simulates a random walk
-void SimulateWalk(PWNet &InNet,
-                  TVVec<TInt, uint64> &WalksVV,
-                  const std::vector<uint64> &StartNIds,
-                  const int &WalkLen,
-                  const int &NumWalk,
-                  TRnd &Rnd,
-                  uint64 current_walk_offset,
-                  std::vector<uint64> &previous_nodes,
-                  std::vector<uint64> &current_nodes,
-                  std::vector<uint64> &saved_step,
-                  std::map<int64, int64> &stats,
-                  const double &reuse_prob) {
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_real_distribution<> dis(0, 1);
-    std::deque<uint64> visit;
-    std::deque<uint64> visit_next;
-    uint64 current_walk_number = 0;
-    for (auto &node: StartNIds) {
-        auto node_iterator = InNet->GetNI(node);
-        if (node_iterator.GetOutDeg() != 0) {
-            for (auto i = 0; i < NumWalk; i++) {
-                auto current_node = node_iterator.GetNbrNId(Rnd.GetUniDevInt(node_iterator.GetOutDeg()));
-                visit.push_front(node);
-                visit.push_front(current_node);
-                BIT_SET(previous_nodes[node], current_walk_number);
-                BIT_SET(current_nodes[current_node], current_walk_number);
-                WalksVV.PutXY(current_walk_offset + current_walk_number, 0, node);
-                WalksVV.PutXY(current_walk_offset + current_walk_number, 1, current_node);
-                current_walk_number++;
-            }
-        } else {
-            for (auto i = 0; i < NumWalk; i++) {
-                WalksVV.PutXY(current_walk_number++, 0, node);
-            }
-        }
-    }
-    uint64 current_length = 2;
-    std::vector<uint64> walk_lengths(NumWalk, 2);
-    while (!visit.empty()) {
-        while (!visit.empty()) {
-            auto previous_node = visit.back();
-            visit.pop_back();
-            auto current_node = visit.back();
-            visit.pop_back();
-            auto node_iterator = InNet->GetNI(current_node);
-            if (node_iterator.GetOutDeg() != 0) {
-                uint64 indexes = previous_nodes[previous_node] & current_nodes[current_node];
-//                int c = 0;
-                if (indexes > 0) {
-                    previous_nodes[previous_node] &= ~indexes;
-                    current_nodes[current_node] &= ~indexes;
-                    TIntVFltVPr *cur_data = nullptr;
-                    while (indexes > 0) {
-//                        c++;
-                        int64 next_node;
-                        if (saved_step[current_node] != -1 && dis(gen) < reuse_prob) {
-                            next_node = saved_step[current_node];
-                        } else {
-                            if (cur_data == nullptr) {
-                                cur_data = &InNet->GetNDat(current_node).GetDat(previous_node);
-                            }
-                            next_node = node_iterator.GetNbrNId(
-                                    AliasDrawInt(*cur_data, Rnd));
-                            saved_step[current_node] = next_node;
-                        }
-                        uint64 index = __builtin_ffsll(indexes) - 1;
-                        if (walk_lengths[index] < WalkLen - 1) {
-                            visit_next.push_front(current_node);
-                            visit_next.push_front(next_node);
-                            BIT_SET(previous_nodes[current_node], index);
-                            BIT_SET(current_nodes[next_node], index);
-                            walk_lengths[index]++;
-                        }
-                        WalksVV.PutXY(current_walk_offset + index, walk_lengths[index], next_node);
-                        BIT_CLEAR(indexes, index);
-                    }
-                }
-//                double p = (int64) (((double) c / node_iterator.GetOutDeg()) * 100);
-//                stats[p]++;
-
-            }
-        }
-        current_length++;
-        std::swap(visit, visit_next);
-    }
-
-}
 
 
 void SimulateWalkReducedBias(PWNet &InNet,
@@ -224,8 +132,8 @@ void SimulateWalkReducedBias(PWNet &InNet,
                              const int &NumWalk,
                              TRnd &Rnd,
                              uint64 current_walk_offset,
-                             std::vector<uint64> &previous_nodes,
-                             std::vector<uint64> &current_nodes,
+                             std::vector<boost::multiprecision::uint512_t> &previous_nodes,
+                             std::vector<boost::multiprecision::uint512_t> &current_nodes,
                              std::vector<uint64> &saved_step,
                              std::vector<bool> &is_dist_1,
                              std::map<int64, int64> &stats,
@@ -243,8 +151,8 @@ void SimulateWalkReducedBias(PWNet &InNet,
                 auto current_node = node_iterator.GetNbrNId(Rnd.GetUniDevInt(node_iterator.GetOutDeg()));
                 visit.push_front(node);
                 visit.push_front(current_node);
-                BIT_SET(previous_nodes[node], current_walk_number);
-                BIT_SET(current_nodes[current_node], current_walk_number);
+                boost::multiprecision::bit_set(previous_nodes[node], current_walk_number);
+                boost::multiprecision::bit_set(current_nodes[current_node], current_walk_number);
                 WalksVV.PutXY(current_walk_offset + current_walk_number, 0, node);
                 WalksVV.PutXY(current_walk_offset + current_walk_number, 1, current_node);
                 current_walk_number++;
@@ -267,7 +175,7 @@ void SimulateWalkReducedBias(PWNet &InNet,
             auto previous_node_iterator = InNet->GetNI(previous_node);
 //            IsOutNId
             if (node_iterator.GetOutDeg() != 0) {
-                uint64 indexes = previous_nodes[previous_node] & current_nodes[current_node];
+                boost::multiprecision::uint512_t indexes = previous_nodes[previous_node] & current_nodes[current_node];
 //                int c = 0;
                 if (indexes > 0) {
                     previous_nodes[previous_node] &= ~indexes;
@@ -300,16 +208,107 @@ void SimulateWalkReducedBias(PWNet &InNet,
                                 }
                             }
                         }
-                        uint64 index = __builtin_ffsll(indexes) - 1;
+                        uint64 index = boost::multiprecision::lsb(indexes);
                         if (walk_lengths[index] < WalkLen - 1) {
                             visit_next.push_front(current_node);
                             visit_next.push_front(next_node);
-                            BIT_SET(previous_nodes[current_node], index);
-                            BIT_SET(current_nodes[next_node], index);
+                            boost::multiprecision::bit_set(previous_nodes[current_node], index);
+                            boost::multiprecision::bit_set(current_nodes[next_node], index);
                             walk_lengths[index]++;
                         }
                         WalksVV.PutXY(current_walk_offset + index, walk_lengths[index], next_node);
-                        BIT_CLEAR(indexes, index);
+                        boost::multiprecision::bit_unset(indexes, index);
+                    }
+                }
+//                double p = (int64) (((double) c / node_iterator.GetOutDeg()) * 100);
+//                stats[p]++;
+
+            }
+        }
+        current_length++;
+        std::swap(visit, visit_next);
+    }
+
+}
+
+
+//Simulates a random walk
+void SimulateWalk(PWNet &InNet,
+                  TVVec<TInt, uint64> &WalksVV,
+                  const std::vector<uint64> &StartNIds,
+                  const int &WalkLen,
+                  const int &NumWalk,
+                  TRnd &Rnd,
+                  uint64 current_walk_offset,
+                  std::vector<boost::multiprecision::uint512_t> &previous_nodes,
+                  std::vector<boost::multiprecision::uint512_t> &current_nodes,
+                  std::vector<uint64> &saved_step,
+                  std::map<int64, int64> &stats,
+                  const double &reuse_prob) {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<> dis(0, 1);
+    std::deque<uint64> visit;
+    std::deque<uint64> visit_next;
+    uint64 current_walk_number = 0;
+    for (auto &node: StartNIds) {
+        auto node_iterator = InNet->GetNI(node);
+        if (node_iterator.GetOutDeg() != 0) {
+            for (auto i = 0; i < NumWalk; i++) {
+                auto current_node = node_iterator.GetNbrNId(Rnd.GetUniDevInt(node_iterator.GetOutDeg()));
+                visit.push_front(node);
+                visit.push_front(current_node);
+                boost::multiprecision::bit_set(previous_nodes[node], current_walk_number);
+                boost::multiprecision::bit_set(current_nodes[current_node], current_walk_number);
+                WalksVV.PutXY(current_walk_offset + current_walk_number, 0, node);
+                WalksVV.PutXY(current_walk_offset + current_walk_number, 1, current_node);
+                current_walk_number++;
+            }
+        } else {
+            for (auto i = 0; i < NumWalk; i++) {
+                WalksVV.PutXY(current_walk_number++, 0, node);
+            }
+        }
+    }
+    uint64 current_length = 2;
+    std::vector<uint64> walk_lengths(NumWalk, 2);
+    while (!visit.empty()) {
+        while (!visit.empty()) {
+            auto previous_node = visit.back();
+            visit.pop_back();
+            auto current_node = visit.back();
+            visit.pop_back();
+            auto node_iterator = InNet->GetNI(current_node);
+            if (node_iterator.GetOutDeg() != 0) {
+                boost::multiprecision::uint512_t indexes = previous_nodes[previous_node] & current_nodes[current_node];
+//                int c = 0;
+                if (indexes > 0) {
+                    previous_nodes[previous_node] &= ~indexes;
+                    current_nodes[current_node] &= ~indexes;
+                    TIntVFltVPr *cur_data = nullptr;
+                    while (indexes > 0) {
+//                        c++;
+                        int64 next_node;
+                        if (saved_step[current_node] != -1 && dis(gen) < reuse_prob) {
+                            next_node = saved_step[current_node];
+                        } else {
+                            if (cur_data == nullptr) {
+                                cur_data = &InNet->GetNDat(current_node).GetDat(previous_node);
+                            }
+                            next_node = node_iterator.GetNbrNId(
+                                    AliasDrawInt(*cur_data, Rnd));
+                            saved_step[current_node] = next_node;
+                        }
+                        uint64 index = boost::multiprecision::lsb(indexes);
+                        if (walk_lengths[index] < WalkLen - 1) {
+                            visit_next.push_front(current_node);
+                            visit_next.push_front(next_node);
+                            boost::multiprecision::bit_set(previous_nodes[current_node], index);
+                            boost::multiprecision::bit_set(current_nodes[next_node], index);
+                            walk_lengths[index]++;
+                        }
+                        WalksVV.PutXY(current_walk_offset + index, walk_lengths[index], next_node);
+                        boost::multiprecision::bit_unset(indexes, index);
                     }
                 }
 //                double p = (int64) (((double) c / node_iterator.GetOutDeg()) * 100);

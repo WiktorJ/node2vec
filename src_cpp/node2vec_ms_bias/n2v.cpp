@@ -24,13 +24,13 @@ void node2vec(PWNet &InNet, const double &ParamP, const double &ParamQ,
     WalksVV = TVVec<TInt, uint64>(AllWalks, WalkLen);
     TRnd Rnd(time(NULL));
     auto node_count = InNet->GetNodes();
-    std::vector<uint64> previous_node(node_count, 0);
-    std::vector<uint64> current_node(node_count, 0);
+    std::vector<boost::multiprecision::uint512_t> previous_node(node_count, 0);
+    std::vector<boost::multiprecision::uint512_t> current_node(node_count, 0);
     std::vector<uint64> saved_step(node_count, -1);
     std::vector<bool> is_dist_1(node_count, false);
     std::map<int64, int64> stats;
 //#pragma omp parallel for schedule(dynamic)
-    uint64 bit_field_size = 64;
+    uint64 bit_field_size = 512;
     uint64 current_walk_number = 0;
     if (reduced_bias) {
         for (int i = 0; i < NIdsV.Len(); ++i) {

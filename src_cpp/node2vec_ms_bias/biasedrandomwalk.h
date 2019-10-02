@@ -6,7 +6,8 @@
 #include "vector"
 #include "unordered_map"
 #include "map"
-
+#include <boost/multiprecision/cpp_int.hpp>
+#include <immintrin.h>
 typedef TNodeEDatNet<TIntIntVFltVPrH, TFlt> TWNet;
 typedef TPt<TWNet> PWNet;
 
@@ -21,8 +22,8 @@ void SimulateWalk(PWNet &InNet,
                   const int &NumWalk,
                   TRnd &Rnd,
                   uint64 current_walk_offset,
-                  std::vector<uint64> &previous_nodes,
-                  std::vector<uint64> &current_nodes,
+                  std::vector<boost::multiprecision::uint512_t> &previous_nodes,
+                  std::vector<boost::multiprecision::uint512_t> &current_nodes,
                   std::vector<uint64> &saved_step,
                   std::map<int64, int64> &stats,
                   const double &reuse_prob);
@@ -36,8 +37,8 @@ void SimulateWalkReducedBias(PWNet &InNet,
                              const int &NumWalk,
                              TRnd &Rnd,
                              uint64 current_walk_offset,
-                             std::vector<uint64> &previous_nodes,
-                             std::vector<uint64> &current_nodes,
+                             std::vector<boost::multiprecision::uint512_t> &previous_nodes,
+                             std::vector<boost::multiprecision::uint512_t> &current_nodes,
                              std::vector<uint64> &saved_step,
                              std::vector<bool> &is_dist_1,
                              std::map<int64, int64> &stats,
