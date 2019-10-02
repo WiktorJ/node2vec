@@ -4,7 +4,7 @@ project(node2vec)
 
 
 set(CMAKE_CXX_STANDARD 20)
-set(SNAPROOT /home/wiktor/Studies/GR/snap)
+set(SNAPROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../snap)
 set(GLIB  glib-core)
 set(SNAP  snap-core)
 set(GLIBADV  glib-adv)
@@ -27,7 +27,6 @@ include_directories(${SOURCEROOT} ${EXGLIBADV} ${EXGLIB} ${EXSNAP} ${EXSNAPADV})
 add_subdirectory(node2vec_ms_bias)
 add_subdirectory(node2vec_ms)
 add_subdirectory(node2vec)
-add_subdirectory(/home/wiktor/Studies/GR/hopscotch-map /home/wiktor/Studies/GR/hopscotch-map/build)
 
 SET_SOURCE_FILES_PROPERTIES(
         ${OBJS}
