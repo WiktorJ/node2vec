@@ -34,7 +34,7 @@ void ParseArgs(int &argc, char *argv[], TStr &InFile, TStr &OutFile,
     Directed = Env.IsArgStr("-dr", "Graph is directed.");
     Weighted = Env.IsArgStr("-w", "Graph is weighted.");
     OutputWalks = Env.IsArgStr("-ow", "Output random walks instead of embeddings.");
-    dry_run = Env.IsArgStr("-dr", "Dry run - execute without writing any output");
+    dry_run = Env.IsArgStr("-dry", "Dry run - execute without writing any output");
 }
 
 void ReadGraph(TStr &InFile, bool &Directed, bool &Weighted, bool &Verbose, PWNet &InNet) {

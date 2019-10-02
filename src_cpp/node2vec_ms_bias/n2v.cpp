@@ -9,7 +9,7 @@ void node2vec(PWNet &InNet, const double &ParamP, const double &ParamQ,
               const int &Dimensions, const int &WalkLen, const int &NumWalks,
               const int &WinSize, const int &Iter, const bool &Verbose,
               const bool &OutputWalks, TVVec<TInt, uint64> &WalksVV,
-              TIntFltVH &EmbeddingsHV) {
+              TIntFltVH &EmbeddingsHV, const bool &reduced_bias) {
     auto start_time = std::chrono::high_resolution_clock::now();
     //Preprocess transition probabilities
     PreprocessTransitionProbs(InNet, ParamP, ParamQ, Verbose);
@@ -32,29 +32,41 @@ void node2vec(PWNet &InNet, const double &ParamP, const double &ParamQ,
 //#pragma omp parallel for schedule(dynamic)
     uint64 bit_field_size = 64;
     uint64 current_walk_number = 0;
-    for (int i = 0; i < NIdsV.Len(); ++i) {
-        if (Verbose) {
-            printf("\rWalking Progress: %.2lf%%", (double) current_walk_number * 100 / (double) AllWalks);
-            fflush(stdout);
-        }
-        std::vector<uint64> start_nodes;
-        start_nodes.push_back(NIdsV[i]);
-        auto walks_left = NumWalks;
-        while (walks_left > 0) {
-            if (walks_left > bit_field_size) {
-                SimulateWalk(InNet, WalksVV, start_nodes, WalkLen, bit_field_size, Rnd, current_walk_number, previous_node,
-                             current_node, saved_step, is_dist_1, stats);
-                current_walk_number += bit_field_size;
-            } else {
-                SimulateWalk(InNet, WalksVV, start_nodes, WalkLen, walks_left, Rnd, current_walk_number, previous_node,
-                             current_node, saved_step, is_dist_1, stats);
-                current_walk_number += + walks_left;
+    if (reduced_bias) {
+        for (int i = 0; i < NIdsV.Len(); ++i) {
+            if (Verbose) {
+                printf("\rWalking Progress: %.2lf%%", (double) current_walk_number * 100 / (double) AllWalks);
+                fflush(stdout);
             }
-            walks_left -= bit_field_size;
+            std::vector<uint64> start_nodes;
+            start_nodes.push_back(NIdsV[i]);
+            auto walks_left = NumWalks;
+            while (walks_left > 0) {
+                auto walks_count = walks_left > bit_field_size ? bit_field_size : walks_left;
+                SimulateWalkReducedBias(InNet, WalksVV, start_nodes, WalkLen, walks_count, Rnd, current_walk_number, previous_node,
+                             current_node, saved_step, is_dist_1, stats);
+                current_walk_number += walks_count;
+                walks_left -= bit_field_size;
+            }
+        }
+    } else {
+        for (int i = 0; i < NIdsV.Len(); ++i) {
+            if (Verbose) {
+                printf("\rWalking Progress: %.2lf%%", (double) current_walk_number * 100 / (double) AllWalks);
+                fflush(stdout);
+            }
+            std::vector<uint64> start_nodes;
+            start_nodes.push_back(NIdsV[i]);
+            auto walks_left = NumWalks;
+            while (walks_left > 0) {
+                auto walks_count = walks_left > bit_field_size ? bit_field_size : walks_left;
+                SimulateWalk(InNet, WalksVV, start_nodes, WalkLen, walks_count, Rnd, current_walk_number, previous_node,
+                             current_node, saved_step, stats);
+                current_walk_number += walks_count;
+                walks_left -= bit_field_size;
+            }
         }
     }
-
-
     auto walk_end_time = std::chrono::high_resolution_clock::now();
     if (!OutputWalks) {
         LearnEmbeddings(WalksVV, Dimensions, WinSize, Iter, Verbose, EmbeddingsHV);
@@ -68,66 +80,5 @@ void node2vec(PWNet &InNet, const double &ParamP, const double &ParamQ,
 //        printf("\n%ld: %ld", key, value);
 //        fflush(stdout);
 //    }
-}
-
-void node2vec(PWNet &InNet, const double &ParamP, const double &ParamQ,
-              const int &Dimensions, const int &WalkLen, const int &NumWalks,
-              const int &WinSize, const int &Iter, const bool &Verbose,
-              TIntFltVH &EmbeddingsHV) {
-    TVVec<TInt, uint64> WalksVV;
-    bool OutputWalks = 0;
-    node2vec(InNet, ParamP, ParamQ, Dimensions, WalkLen, NumWalks, WinSize,
-             Iter, Verbose, OutputWalks, WalksVV, EmbeddingsHV);
-}
-
-
-void node2vec(const PNGraph &InNet, const double &ParamP, const double &ParamQ,
-              const int &Dimensions, const int &WalkLen, const int &NumWalks,
-              const int &WinSize, const int &Iter, const bool &Verbose,
-              const bool &OutputWalks, TVVec<TInt, uint64> &WalksVV,
-              TIntFltVH &EmbeddingsHV) {
-    PWNet NewNet = PWNet::New();
-    for (TNGraph::TEdgeI EI = InNet->BegEI(); EI < InNet->EndEI(); EI++) {
-        if (!NewNet->IsNode(EI.GetSrcNId())) { NewNet->AddNode(EI.GetSrcNId()); }
-        if (!NewNet->IsNode(EI.GetDstNId())) { NewNet->AddNode(EI.GetDstNId()); }
-        NewNet->AddEdge(EI.GetSrcNId(), EI.GetDstNId(), 1.0);
-    }
-    node2vec(NewNet, ParamP, ParamQ, Dimensions, WalkLen, NumWalks, WinSize, Iter,
-             Verbose, OutputWalks, WalksVV, EmbeddingsHV);
-}
-
-void node2vec(const PNGraph &InNet, const double &ParamP, const double &ParamQ,
-              const int &Dimensions, const int &WalkLen, const int &NumWalks,
-              const int &WinSize, const int &Iter, const bool &Verbose,
-              TIntFltVH &EmbeddingsHV) {
-    TVVec<TInt, uint64> WalksVV;
-    bool OutputWalks = 0;
-    node2vec(InNet, ParamP, ParamQ, Dimensions, WalkLen, NumWalks, WinSize,
-             Iter, Verbose, OutputWalks, WalksVV, EmbeddingsHV);
-}
-
-void node2vec(const PNEANet &InNet, const double &ParamP, const double &ParamQ,
-              const int &Dimensions, const int &WalkLen, const int &NumWalks,
-              const int &WinSize, const int &Iter, const bool &Verbose,
-              const bool &OutputWalks, TVVec<TInt, uint64> &WalksVV,
-              TIntFltVH &EmbeddingsHV) {
-    PWNet NewNet = PWNet::New();
-    for (TNEANet::TEdgeI EI = InNet->BegEI(); EI < InNet->EndEI(); EI++) {
-        if (!NewNet->IsNode(EI.GetSrcNId())) { NewNet->AddNode(EI.GetSrcNId()); }
-        if (!NewNet->IsNode(EI.GetDstNId())) { NewNet->AddNode(EI.GetDstNId()); }
-        NewNet->AddEdge(EI.GetSrcNId(), EI.GetDstNId(), InNet->GetFltAttrDatE(EI, "weight"));
-    }
-    node2vec(NewNet, ParamP, ParamQ, Dimensions, WalkLen, NumWalks, WinSize, Iter,
-             Verbose, OutputWalks, WalksVV, EmbeddingsHV);
-}
-
-void node2vec(const PNEANet &InNet, const double &ParamP, const double &ParamQ,
-              const int &Dimensions, const int &WalkLen, const int &NumWalks,
-              const int &WinSize, const int &Iter, const bool &Verbose,
-              TIntFltVH &EmbeddingsHV) {
-    TVVec<TInt, uint64> WalksVV;
-    bool OutputWalks = 0;
-    node2vec(InNet, ParamP, ParamQ, Dimensions, WalkLen, NumWalks, WinSize,
-             Iter, Verbose, OutputWalks, WalksVV, EmbeddingsHV);
 }
 

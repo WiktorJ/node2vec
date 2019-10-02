@@ -10,24 +10,31 @@ from gensim.models import Word2Vec
 import time
 from distance import get_matrixs, calc_matrix_norm, cluster_distance
 
+from src3 import node2vec_ms_walk_biased
+
 config = {
     # 'input': '../graph/facebook_combined.edgelist',
     # 'input': '../graph/artist_edges.edgelist',
-    # 'input': '../graph/email-Eu-core.txt',
-    'input': '../graph/lesmis.edgelist',
+    'input': '../graph/email-Eu-core.txt',
+    # 'input': '../graph/email-Eu-core-nl.edgelist',
+    # 'input': '../graph/lesmis.edgelist',
     # 'output': '../emb/lesmis{}.emb',
-    'dimensions': 16,
-    'walk_length': 80,
+    'dimensions': 32,
+    'walk_length': 20,
     'num_walks': 120,
     'window_size': 10,
     'iter': 10,
     'workers': 8,
-    'p': 1,
-    'q': 1,
+    'p': 0.5,
+    'q': 3,
     'weighted': False,
     'directed': False,
-    'unweighted': True
-
+    'unweighted': True,
+    'simulate_args': {
+        'walk_length': 80,
+        'num_walks': 120,
+        'concurrent_nodes': 1
+    }
 }
 
 
@@ -61,19 +68,19 @@ def learn_embeddings(walks, config):
     return list(zip(model.wv.vectors, model.wv.index2entity))
 
 
-def test(config, impl, nc, log_stats=False):
+def test(config, impl, sim_config, log_stats=False):
     start = time.time()
     nx_G = read_graph(config)
     G = impl.Graph(nx_G, config['directed'], config['p'], config['q'], log_stats)
     G.preprocess_transition_probs()
-    walks = G.simulate_walks(config['num_walks'], config['walk_length'], nc)
+    walks = G.simulate_walks(**sim_config)
     walk_end = time.time()
-    print(f"Walk Time: {walk_end - start}, Concurrent walks: {nc}")
-    # emb =learn_embeddings(walks, config)
-    # print(f"Emb Time: {time.time() - walk_end}")
-    # print(f"Total Time: {time.time() - start}")
-    # return emb
-    return 1
+    print(f"Walk Time: {walk_end - start}, Concurrent walks: {sim_config['concurrent_nodes']}")
+    emb = learn_embeddings(walks, config)
+    print(f"Emb Time: {time.time() - walk_end}")
+    print(f"Total Time: {time.time() - start}")
+    return emb
+    # return 1
 
 
 test_count = 1
@@ -85,9 +92,10 @@ outputs_base = [('../emb/lesmis' + str(i + 1) + '.emb', "base_" + str(i + 1)) fo
                 range(test_count, 2 * test_count)]
 
 # res = {}
-# print("Base times")
-# for el in [1]:
-#     test(config, node2vec, el)
+print("Base times")
+for el in [1]:
+    config['output'] = f"../emb/email_base_loops.emb"
+    test(config, node2vec, config['simulate_args'])
 # #
 # print()
 # print("No hash grouping")
@@ -97,13 +105,19 @@ outputs_base = [('../emb/lesmis' + str(i + 1) + '.emb', "base_" + str(i + 1)) fo
 # print()
 # print("Hash grouping")
 # for el in [1, 4, 8, 16, 32, 64, 128]:
-for el in [1]:
-    test(config, node2vec_ms_walk, el, True)
+# for el in [2]:
+#     sim_config = config['simulate_args']
+#     sim_config['concurrent_nodes'] = el
+#     test(config, node2vec_ms_walk, sim_config, True)
 
-# print()
-# print("Hash grouping2")
-# for el in [1, 2, 4, 6, 8, 12, 16, 24, 32, 64, 128, 256, 512]:
-#     test(config, node2vec_ms_walk2, el)
+print()
+print("biased walk")
+for el in [1]:
+    config['output'] = f"../emb/email_biased_loops.emb"
+    sim_config = config['simulate_args']
+    sim_config['concurrent_nodes'] = el
+    sim_config['reuse_probability'] = 0.6
+    test(config, node2vec_ms_walk_biased, sim_config, True)
 
 # for i in range(10):
 #     test(config, node2vec_ms, 2**(i+1))

@@ -9,7 +9,7 @@
 void ParseArgs(int &argc, char *argv[], TStr &InFile, TStr &OutFile,
                int &Dimensions, int &WalkLen, int &NumWalks, int &WinSize, int &Iter,
                bool &Verbose, double &ParamP, double &ParamQ, bool &Directed, bool &Weighted,
-               bool &OutputWalks, double &reuse_probability, bool &dry_run) {
+               bool &OutputWalks, double &reuse_probability, bool &dry_run, bool &reduced_bias) {
     Env = TEnv(argc, argv, TNotify::StdNotify);
     Env.PrepArgs(TStr::Fmt("\nAn algorithmic framework for representational learning on graphs."));
     InFile = Env.GetIfArgPrefixStr("-i:", "graph/karate.edgelist",
@@ -36,7 +36,8 @@ void ParseArgs(int &argc, char *argv[], TStr &InFile, TStr &OutFile,
     Directed = Env.IsArgStr("-dr", "Graph is directed.");
     Weighted = Env.IsArgStr("-w", "Graph is weighted.");
     OutputWalks = Env.IsArgStr("-ow", "Output random walks instead of embeddings.");
-    dry_run = Env.IsArgStr("-dr", "Dry run - execute without writing any output");
+    dry_run = Env.IsArgStr("-dry", "Dry run - execute without writing any output");
+    reduced_bias = Env.IsArgStr("-rb", "Reduced bias - saved step will take in to account previous node placement");
 }
 
 void ReadGraph(TStr &InFile, bool &Directed, bool &Weighted, bool &Verbose, PWNet &InNet) {
@@ -108,16 +109,16 @@ int main(int argc, char *argv[]) {
     TStr InFile, OutFile;
     int Dimensions, WalkLen, NumWalks, WinSize, Iter;
     double ParamP, ParamQ, reuse_probability;
-    bool Directed, Weighted, Verbose, OutputWalks, dry_run;
+    bool Directed, Weighted, Verbose, OutputWalks, dry_run, reduced_bias;
     ParseArgs(argc, argv, InFile, OutFile, Dimensions, WalkLen, NumWalks, WinSize,
               Iter, Verbose, ParamP, ParamQ, Directed, Weighted, OutputWalks,
-              reuse_probability, dry_run);
+              reuse_probability, dry_run, reduced_bias);
     PWNet InNet = PWNet::New();
     TIntFltVH EmbeddingsHV;
     TVVec<TInt, uint64> WalksVV;
     ReadGraph(InFile, Directed, Weighted, Verbose, InNet);
     node2vec(InNet, ParamP, ParamQ, Dimensions, WalkLen, NumWalks, WinSize, Iter,
-             Verbose, OutputWalks, WalksVV, EmbeddingsHV);
+             Verbose, OutputWalks, WalksVV, EmbeddingsHV, reduced_bias);
     if (~dry_run) {
         WriteOutput(OutFile, EmbeddingsHV, WalksVV, OutputWalks);
     }
