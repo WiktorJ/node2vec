@@ -14,4 +14,4 @@ add_executable(
 #        LINK_FLAGS "-fopenmp")
 
 
-target_link_libraries(node2vec_ms PRIVATE -fopenmp)
+target_link_libraries(node2vec_ms -fopenmp)

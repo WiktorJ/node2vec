@@ -57,7 +57,8 @@ def get_loops(array):
 
 def delete_looped_labels(edgelist, labels):
     loops, _, _ = get_loops(edgelist)
-    return [(int(el[0]) - find_index_smaller_larger_than(int(el[0]), loops), int(el[1])) for el in labels if int(el[0]) not in loops]
+    return [(int(el[0]) - find_index_smaller_larger_than(int(el[0]), loops), int(el[1])) for el in labels if
+            int(el[0]) not in loops]
 
 
 def delete_loops(array):
@@ -73,7 +74,7 @@ def delete_loops(array):
 
 def get_edgelist_from_file(file_path):
     with open(file_path) as file:
-        return list(csv.reader(file, delimiter=' '))
+        return [tuple(map(int, el)) for el in csv.reader(file, delimiter=' ')]
 
 
 def save_edgelist_to_file(file_path, edgelist):
@@ -82,10 +83,27 @@ def save_edgelist_to_file(file_path, edgelist):
         csv_writer.writerows(edgelist)
 
 
-labels = get_edgelist_from_file('../labels/email-Eu-core-department-labels.txt')
-edgelist = get_edgelist_from_file('../graph/email-Eu-core.txt')
-labels_d = delete_looped_labels(edgelist, labels)
-save_edgelist_to_file('../labels/email-Eu-core-department-labels-nl.txt', labels_d)
+def extract_communities(graph, labels, communities):
+    extracted_labels = [el[0] for el in labels if el[1] in communities]
+    return [el for el in graph if el[0] in extracted_labels and el[1] in extracted_labels]
+
+
+def reduce_node_ids(graph):
+    nodes = set(el for tup in graph for el in tup)
+    mapping = {}
+    for i, node in enumerate(nodes):
+        mapping[node] = i
+    return [(mapping[el[0]], mapping[el[1]]) for el in graph]
+
+
+graph = get_edgelist_from_file('../graph/email-Eu-core-small.edgelist')
+
+save_edgelist_to_file('../graph/email-Eu-core-small-denominated.edgelist', reduce_node_ids(graph))
+# labels = get_edgelist_from_file('../labels/email-Eu-core-department-labels-nl.txt')
+# edgelist = get_edgelist_from_file('../graph/email-Eu-core-nl.edgelist')
+# save_edgelist_to_file('../graph/email-Eu-core-small.edgelist', extract_communities(edgelist, labels, {2, 3, 5, 8, 9}))
+# labels_d = delete_looped_labels(edgelist, labels)
+# save_edgelist_to_file('../labels/email-Eu-core-department-labels-nl.txt', labels_d)
 # with open('../graph/email-Eu-core.txt') as file:
 #     edge_list = csv.reader(file, delimiter=' ')
 #     # np_matrix = np.array(list(matrix), dtype=int)

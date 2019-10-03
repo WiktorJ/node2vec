@@ -39,15 +39,10 @@ void node2vec(PWNet &InNet, const double &ParamP, const double &ParamQ,
         start_nodes.push_back(NIdsV[i]);
         auto walks_left = NumWalks;
         while (walks_left > 0) {
-            if (walks_left > bit_field_size) {
-                SimulateWalk(InNet, WalksVV, start_nodes, WalkLen, bit_field_size, Rnd, current_walk_number, previous_node,
-                             current_node, stats);
-                current_walk_number += bit_field_size;
-            } else {
-                SimulateWalk(InNet, WalksVV, start_nodes, WalkLen, walks_left, Rnd, current_walk_number, previous_node,
-                             current_node, stats);
-                current_walk_number += + walks_left;
-            }
+            auto walks_count = walks_left > bit_field_size ? bit_field_size : walks_left;
+            SimulateWalk(InNet, WalksVV, start_nodes, WalkLen, walks_count, Rnd, current_walk_number, previous_node,
+                         current_node, stats);
+            current_walk_number += walks_count;
             walks_left -= bit_field_size;
         }
     }
