@@ -15,9 +15,9 @@ from src3 import node2vec_ms_walk_biased
 config = {
     # 'input': '../graph/facebook_combined.edgelist',
     # 'input': '../graph/artist_edges.edgelist',
-    'input': '../graph/email-Eu-core.txt',
+    # 'input': '../graph/email-Eu-core.txt',
     # 'input': '../graph/email-Eu-core-nl.edgelist',
-    # 'input': '../graph/lesmis.edgelist',
+    'input': '../graph/lesmis.edgelist',
     # 'output': '../emb/lesmis{}.emb',
     'dimensions': 32,
     'walk_length': 20,

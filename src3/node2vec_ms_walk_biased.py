@@ -158,6 +158,7 @@ class Graph:
             }
         else:
             cur_count['count'] += count
+            cur_count['time_access'][step] = cur_count['time_access'].get(step, [])
             cur_count['time_access'][step].append(count)
             cur_count['starting_nodes'][starting_node] = cur_count['starting_nodes'].get(starting_node, 0) + 1
             cur_count['batch_id'][batch_id] = cur_count['batch_id'].get(batch_id, 0) + 1
