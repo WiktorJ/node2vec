@@ -69,7 +69,7 @@ d = dict(nx.degree(G))
 # embeddings = ["lesmis_base", "lesmis_biased"]
 embeddings = ["karate_base", "karate_ms", "karate_bias"]
 # embeddings = ["email_base_loops", "email_biased_loops"]
-clusters = 5
+clusters = 2
 
 Xs = [get_as_numpy_array(f'../emb/{embedding}.emb') for embedding in embeddings]
 predictions = [cluster.KMeans(n_clusters=clusters, random_state=0).fit(X).labels_ for X in Xs]
@@ -78,9 +78,10 @@ predictions = [cluster.KMeans(n_clusters=clusters, random_state=0).fit(X).labels
 #     labels = list(csv.reader(file, delimiter=' '))
 # labels = [int(el[1]) for el in labels]
 mapped_predictions = []
-# for pred in predictions:
-#     m = map_clusters(pred, labels, clusters)
-#     mapped_predictions.append([m[el] for el in pred])
+for pred in predictions[1:]:
+    m = map_clusters(pred, predictions[0], clusters)
+    mapped_predictions.append([m[el] for el in pred])
+mapped_predictions = [predictions[0]] + mapped_predictions
 # mapping1 = map_clusters(predictions[1], labels, 42)
 # calc_cluster_distance(predictions[0], labels, 42, "base")
 # calc_cluster_distance(predictions[1], labels, 42, "biased")
@@ -116,10 +117,10 @@ print(f"estiated diff assigments: {len(diff) / len(G.nodes())}")
 # plt.savefig("labels.pdf")
 for i in range(len(embeddings)):
     plt.title(embeddings[i])
-    nx.draw(G, pos=pos, node_list=d.keys(), node_size=0.2,
-            node_color=predictions[i], width=0.0001)
-    # plt.show(dpi=1500)
-    plt.savefig(f"{embeddings[i]}.pdf")
+    nx.draw(G, pos=pos, node_list=d.keys(), node_size=[n * 2 for n in d.values()],
+            node_color=mapped_predictions[i], width=0.5)
+    plt.show(dpi=1500)
+    # plt.savefig(f"{embeddings[i]}.pdf")
 
 # plt.title(embeddings[1])
 # nx.draw(G, pos=pos, node_list=d.keys(), node_size=0.2,

@@ -21,7 +21,7 @@ def adjacency_matrix_to_edgelist(matrix):
     return edgelist
 
 
-def reduce_if_exceeds(tuple, treshold=16, reduction=1):
+def reduce_if_exceeds(tuple, treshold=0, reduction=1):
     a, b = tuple
     if a > treshold:
         a -= reduction
@@ -97,11 +97,11 @@ def reduce_node_ids(graph, labels):
     return [(mapping[el[0]], mapping[el[1]]) for el in graph], [(mapping[label[0]], label[1]) for label in labels if mapping.get(label[0]) is not None]
 
 
-graph = get_edgelist_from_file('../graph/email-Eu-core-small.edgelist')
-labels = get_edgelist_from_file('../labels/email-Eu-core-department-labels-nl.txt')
-new_graph, new_labels = extract_communities(graph, labels, {2, 3, 5, 8, 9})
-new_graph, new_labels = reduce_node_ids(new_graph, new_labels)
-save_edgelist_to_file('../labels/email-Eu-core-department-labels-denominated.txt', new_labels)
+graph = get_edgelist_from_file('../graph/karate.edgelist')
+save_edgelist_to_file('../graph/karate-fix.edgelist', [reduce_if_exceeds(el) for el in graph])
+# labels = get_edgelist_from_file('../labels/email-Eu-core-department-labels-nl.txt')
+# new_graph, new_labels = extract_communities(graph, labels, {2, 3, 5, 8, 9})
+# new_graph, new_labels = reduce_node_ids(new_graph, new_labels)
 # save_edgelist_to_file('../graph/email-Eu-core-small-denominated.edgelist', reduce_node_ids(graph))
 # edgelist = get_edgelist_from_file('../graph/email-Eu-core-nl.edgelist')
 # save_edgelist_to_file('../graph/email-Eu-core-small.edgelist', extract_communities(edgelist, labels, {2, 3, 5, 8, 9}))

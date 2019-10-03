@@ -5,3 +5,4 @@ numpy
 gensim
 scikit-learn
 matplotlib
+click

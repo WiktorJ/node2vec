@@ -5,6 +5,7 @@ import math
 
 from sklearn import mixture
 from sklearn import cluster
+from sklearn import metrics
 
 
 def cos_distance(a, b):
@@ -109,6 +110,11 @@ def cluster_distance(embeddings, k):
             # calc_cluster_distance(get_gmm_clusters(el1, k), get_gmm_clusters(el2, k), k, "BGMM")
             calc_cluster_distance(get_km_clusters(el1[1], k), get_km_clusters(el2[1], k), k, "KMeans")
             print("---------------")
+
+
+def calc_ars(cluster, labels):
+    return metrics.adjusted_rand_score(cluster, labels)
+
 # calc_matrix_norm(get_matrixs('../emb/lesmis{}.emb', 4))
 
 # for i in range(len(f1)):

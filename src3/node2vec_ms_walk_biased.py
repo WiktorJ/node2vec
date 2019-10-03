@@ -152,13 +152,13 @@ class Graph:
                 "count": count,
                 "source_neighbors": len(self.neighbors[cur]),
                 "target_neighbors": len(self.neighbors[prev]) if self.neighbors.get(prev) else 0,
-                "time_access": {step: count},
+                "time_access": {step: [count]},
                 "starting_nodes": {starting_node: 1},
                 "batch_id": {batch_id: 1}
             }
         else:
             cur_count['count'] += count
-            cur_count['time_access'][step] = count
+            cur_count['time_access'][step].append(count)
             cur_count['starting_nodes'][starting_node] = cur_count['starting_nodes'].get(starting_node, 0) + 1
             cur_count['batch_id'][batch_id] = cur_count['batch_id'].get(batch_id, 0) + 1
 
@@ -179,6 +179,10 @@ class Graph:
                                         batch_id=batch,
                                         reuse_probability=reuse_probability)
             batch += 1
+
+        for v1 in self.edges_count.values():
+            for step in set(v1['time_access'].keys()):
+                v1['time_access'][step] = sum(v1['time_access'][step]) / len(v1['time_access'][step])
 
         if self.log_stats:
             stats = json.dumps(
