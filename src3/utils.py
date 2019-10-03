@@ -85,21 +85,24 @@ def save_edgelist_to_file(file_path, edgelist):
 
 def extract_communities(graph, labels, communities):
     extracted_labels = [el[0] for el in labels if el[1] in communities]
-    return [el for el in graph if el[0] in extracted_labels and el[1] in extracted_labels]
+    return [el for el in graph if el[0] in extracted_labels and el[1] in extracted_labels], \
+           [label for label in labels if label[1] in communities]
 
 
-def reduce_node_ids(graph):
+def reduce_node_ids(graph, labels):
     nodes = set(el for tup in graph for el in tup)
     mapping = {}
     for i, node in enumerate(nodes):
         mapping[node] = i
-    return [(mapping[el[0]], mapping[el[1]]) for el in graph]
+    return [(mapping[el[0]], mapping[el[1]]) for el in graph], [(mapping[label[0]], label[1]) for label in labels if mapping.get(label[0]) is not None]
 
 
 graph = get_edgelist_from_file('../graph/email-Eu-core-small.edgelist')
-
-save_edgelist_to_file('../graph/email-Eu-core-small-denominated.edgelist', reduce_node_ids(graph))
-# labels = get_edgelist_from_file('../labels/email-Eu-core-department-labels-nl.txt')
+labels = get_edgelist_from_file('../labels/email-Eu-core-department-labels-nl.txt')
+new_graph, new_labels = extract_communities(graph, labels, {2, 3, 5, 8, 9})
+new_graph, new_labels = reduce_node_ids(new_graph, new_labels)
+save_edgelist_to_file('../labels/email-Eu-core-department-labels-denominated.txt', new_labels)
+# save_edgelist_to_file('../graph/email-Eu-core-small-denominated.edgelist', reduce_node_ids(graph))
 # edgelist = get_edgelist_from_file('../graph/email-Eu-core-nl.edgelist')
 # save_edgelist_to_file('../graph/email-Eu-core-small.edgelist', extract_communities(edgelist, labels, {2, 3, 5, 8, 9}))
 # labels_d = delete_looped_labels(edgelist, labels)
