@@ -173,7 +173,8 @@ class Graph:
         random.shuffle(nodes)
         batch = 0
         for node_chunk in self.neighbor_chunker(concurrent_nodes):
-            print(f"total nodes: {len(nodes)}, processed: {concurrent_nodes*batch}")
+            if batch % 1000 == 0:
+                print(f"total nodes: {len(nodes)}, processed: {concurrent_nodes*batch}")
             start_nodes = list(node_chunk)
             walks += self.node2vec_walk(walk_length=walk_length,
                                         start_nodes=start_nodes,
@@ -226,7 +227,7 @@ class Graph:
         is_directed = self.is_directed
 
         alias_nodes = {}
-        for node in G.nodes():
+        for i, node in enumerate(G.nodes()):
             unnormalized_probs = [G[node][nbr]['weight'] for nbr in sorted(G.neighbors(node))]
             norm_const = sum(unnormalized_probs)
             normalized_probs = [float(u_prob) / norm_const for u_prob in unnormalized_probs]
