@@ -191,9 +191,7 @@ class Graph:
             stats = json.dumps(
                 {"nodes": len(G.nodes()),
                  "edges": len(G.edges()),
-                 "stats": self.edges_count},
-                indent=1
-            )
+                 "stats": self.edges_count})
             with open(f"stats_{num_walks}_{walk_length}_{concurrent_nodes}.json", 'w') as stat_file:
                 stat_file.write(stats)
         return walks
