@@ -2,7 +2,7 @@ import numpy as np
 import random
 from itertools import islice, chain
 import json
-
+import pickle
 
 class WalkAggregator:
 
@@ -192,8 +192,9 @@ class Graph:
                 {"nodes": len(G.nodes()),
                  "edges": len(G.edges()),
                  "stats": self.edges_count})
-            with open(f"stats_{num_walks}_{walk_length}_{concurrent_nodes}.json", 'w') as stat_file:
-                stat_file.write(stats)
+            with open(f"stats_{num_walks}_{walk_length}_{concurrent_nodes}.pkl", 'wb') as stat_file:
+                pickle.dump(stats, stat_file)
+                # stat_file.write(stats)
         return walks
 
     def get_alias_edge(self, src, dst):
