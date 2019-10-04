@@ -173,6 +173,7 @@ class Graph:
         random.shuffle(nodes)
         batch = 0
         for node_chunk in self.neighbor_chunker(concurrent_nodes):
+            print(f"total nodes: {len(nodes)}, processed: {concurrent_nodes*batch}")
             start_nodes = list(node_chunk)
             walks += self.node2vec_walk(walk_length=walk_length,
                                         start_nodes=start_nodes,
