@@ -126,7 +126,8 @@ class Graph:
                 (current_node, previous_node), walks = visit_dict.popitem()
                 cur_nbrs = self.neighbors[current_node]
                 if self.log_stats:
-                    self.update_edges_count(current_node, previous_node, len(walks), len(walks[0]), walks[0][0], batch_id)
+                    self.update_edges_count(current_node, previous_node, len(walks), len(walks[0]), walks[0][0],
+                                            batch_id)
                 if len(cur_nbrs) > 0:
                     if len(walks[0]) == 1:
                         drawn = self.draw_node(current_node, len(walks), cur_nbrs)
@@ -154,7 +155,8 @@ class Graph:
             }
         else:
             cur_count['count'] += count
-            cur_count['time_access'][step] = count
+            cur_count['time_access'][step] = cur_count['time_access'].get(step, [])
+            cur_count['time_access'][step].append(count)
             cur_count['starting_nodes'][starting_node] = cur_count['starting_nodes'].get(starting_node, 0) + 1
             cur_count['batch_id'][batch_id] = cur_count['batch_id'].get(batch_id, 0) + 1
 
@@ -169,8 +171,13 @@ class Graph:
         batch = 0
         for node_chunk in self.neighbor_chunker(concurrent_nodes):
             start_nodes = list(node_chunk)
-            walks += self.node2vec_walk(walk_length=walk_length, start_nodes=start_nodes, num_walks=num_walks, batch_id=batch)
+            walks += self.node2vec_walk(walk_length=walk_length, start_nodes=start_nodes, num_walks=num_walks,
+                                        batch_id=batch)
             batch += 1
+
+        for v1 in self.edges_count.values():
+            for step in set(v1['time_access'].keys()):
+                v1['time_access'][step] = sum(v1['time_access'][step]) / len(v1['time_access'][step])
 
         if self.log_stats:
             stats = json.dumps(
