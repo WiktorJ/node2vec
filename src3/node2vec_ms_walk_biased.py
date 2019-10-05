@@ -192,9 +192,9 @@ class Graph:
                 {"nodes": len(G.nodes()),
                  "edges": len(G.edges()),
                  "stats": self.edges_count})
-            with open(f"stats_{num_walks}_{walk_length}_{concurrent_nodes}.pkl", 'wb') as stat_file:
-                pickle.dump(stats, stat_file)
-                # stat_file.write(stats)
+            with open(f"stats_{num_walks}_{walk_length}_{concurrent_nodes}_{reuse_probability}.json", 'w') as stat_file:
+                # pickle.dump(stats, stat_file)
+                stat_file.write(stats)
         return walks
 
     def get_alias_edge(self, src, dst):

@@ -12,6 +12,32 @@ def get_as_numpy_array(file_path):
         return np.array(feature_array, dtype=float)
 
 
+def map_embeddings_to_consecutive(embs):
+    mapping = {}
+    arrays = []
+    with open(embs[0]) as file:
+        features = csv.reader(file, delimiter=' ')
+        header = next(features, None)
+        feature_array = np.zeros((int(header[0]), int(header[1])))
+        for i, feature in enumerate(features):
+            mapping[int(feature[0])] = i
+            feature_array[i] = feature[1:]
+
+    arrays.append(feature_array)
+
+    for emb in embs[1:]:
+        with open(emb) as file:
+            features = csv.reader(file, delimiter=' ')
+            header = next(features, None)
+            feature_array = np.zeros((int(header[0]), int(header[1])))
+            for i, feature in enumerate(features):
+                feature_array[mapping[int(feature[0])]] = feature[1:]
+
+        arrays.append(feature_array)
+
+    return arrays
+
+
 def adjacency_matrix_to_edgelist(matrix):
     edgelist = []
     for i, row in enumerate(matrix):
