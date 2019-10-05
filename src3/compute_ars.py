@@ -3,7 +3,7 @@ from sklearn import cluster
 from distance import calc_ars, get_gmm_clusters
 import click
 from plot_utils import get_nx_graph
-from utils import get_as_numpy_array
+from utils import get_as_numpy_array, map_embeddings_to_consecutive
 
 
 @click.command()
@@ -13,11 +13,10 @@ from utils import get_as_numpy_array
 @click.option("-c", "--clusters", type=int, required=True)
 @click.option("-m", "--method", type=click.Choice(['kmeans', 'gmm']))
 def main(embeddings_1, embeddings_2, graph_path, clusters, method):
-    emb1 = get_as_numpy_array(embeddings_1)
-    emb2 = get_as_numpy_array(embeddings_2)
+    emb1, emb2 = map_embeddings_to_consecutive([embeddings_1, embeddings_2])
     if method == 'kmeans':
-        prediction1 = cluster.KMeans(n_clusters=clusters, random_state=0).fit(emb1).label
-        prediction2 = cluster.KMeans(n_clusters=clusters, random_state=0).fit(emb2).label
+        prediction1 = cluster.KMeans(n_clusters=clusters, random_state=0).fit(emb1).labels_
+        prediction2 = cluster.KMeans(n_clusters=clusters, random_state=0).fit(emb2).labels_
     else:
         prediction1 = get_gmm_clusters(emb1, clusters)
         prediction2 = get_gmm_clusters(emb2, clusters)

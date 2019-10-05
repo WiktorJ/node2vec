@@ -10,7 +10,7 @@ from gensim.models import Word2Vec
 import time
 from distance import get_matrixs, calc_matrix_norm, cluster_distance
 
-from src3 import node2vec_ms_walk_biased
+import node2vec_ms_walk_biased
 
 config = {
     # 'input': '../graph/facebook_combined.edgelist',
@@ -94,7 +94,7 @@ outputs_base = [('../emb/lesmis' + str(i + 1) + '.emb', "base_" + str(i + 1)) fo
 # res = {}
 print("Base times")
 for el in [1]:
-    config['output'] = f"../emb/email_base_loops.emb"
+    config['output'] = f"../emb/lesmis_base.emb"
     test(config, node2vec, config['simulate_args'])
 # #
 # print()
@@ -113,7 +113,7 @@ for el in [1]:
 print()
 print("biased walk")
 for el in [1]:
-    config['output'] = f"../emb/email_biased_loops.emb"
+    config['output'] = f"../emb/lesmis_biased.emb"
     sim_config = config['simulate_args']
     sim_config['concurrent_nodes'] = el
     sim_config['reuse_probability'] = 0.6

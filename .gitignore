@@ -127,3 +127,4 @@ cmake-build-debug
 
 notebooks/data
 src3/*.pdf
+*.pkl
