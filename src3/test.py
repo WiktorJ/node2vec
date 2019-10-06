@@ -94,7 +94,7 @@ outputs_base = [('../emb/lesmis' + str(i + 1) + '.emb', "base_" + str(i + 1)) fo
 # res = {}
 print("Base times")
 for el in [1]:
-    config['output'] = f"../emb/lesmis_base.emb"
+    config['output'] = f"../emb/lesmis_base2.emb"
     test(config, node2vec, config['simulate_args'])
 # #
 # print()

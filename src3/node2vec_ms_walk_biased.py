@@ -4,6 +4,7 @@ from itertools import islice, chain
 import json
 import pickle
 
+
 class WalkAggregator:
 
     def __init__(self, current: int, walks: list, walks_length: int = 1, prev: int = None):
@@ -149,19 +150,19 @@ class Graph:
         cur_count = self.edges_count.get(key)
         if not cur_count:
             self.edges_count[key] = {
-                "count": count,
-                "source_neighbors": len(self.neighbors[cur]),
-                "target_neighbors": len(self.neighbors[prev]) if self.neighbors.get(prev) else 0,
-                "time_access": {step: [count]},
-                "starting_nodes": {starting_node: 1},
-                "batch_id": {batch_id: 1}
+                "c": count,  # count
+                "sn": len(self.neighbors[cur]),  # source nodes
+                "tn": len(self.neighbors[prev]) if self.neighbors.get(prev) else 0,  # target nodes
+                "ta": {step: [count]},  # time access
+                "stn": {starting_node: 1},  # starting nodes
+                # "b": {batch_id: 1}  # batch id
             }
         else:
-            cur_count['count'] += count
-            cur_count['time_access'][step] = cur_count['time_access'].get(step, [])
-            cur_count['time_access'][step].append(count)
-            cur_count['starting_nodes'][starting_node] = cur_count['starting_nodes'].get(starting_node, 0) + 1
-            cur_count['batch_id'][batch_id] = cur_count['batch_id'].get(batch_id, 0) + 1
+            cur_count['c'] += count
+            cur_count['ta'][step] = cur_count['ta'].get(step, [])
+            cur_count['ta'][step].append(count)
+            cur_count['stn'][starting_node] = cur_count['stn'].get(starting_node, 0) + 1
+            # cur_count['b'][batch_id] = cur_count['b'].get(batch_id, 0) + 1
 
     def simulate_walks(self, num_walks, walk_length, concurrent_nodes=16, reuse_probability=0.6):
         '''
@@ -174,7 +175,7 @@ class Graph:
         batch = 0
         for node_chunk in self.neighbor_chunker(concurrent_nodes):
             if batch % 1000 == 0:
-                print(f"total nodes: {len(nodes)}, processed: {concurrent_nodes*batch}")
+                print(f"total nodes: {len(nodes)}, processed: {concurrent_nodes * batch}")
             start_nodes = list(node_chunk)
             walks += self.node2vec_walk(walk_length=walk_length,
                                         start_nodes=start_nodes,
@@ -184,8 +185,8 @@ class Graph:
             batch += 1
 
         for v1 in self.edges_count.values():
-            for step in set(v1['time_access'].keys()):
-                v1['time_access'][step] = sum(v1['time_access'][step]) / len(v1['time_access'][step])
+            for step in set(v1['ta'].keys()):
+                v1['ta'][step] = round(sum(v1['ta'][step]) / len(v1['ta'][step]), 1)
 
         if self.log_stats:
             stats = json.dumps(

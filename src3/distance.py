@@ -9,7 +9,7 @@ from sklearn import metrics
 
 
 def cos_distance(a, b):
-    return 1 - a.dot(b) / (np.linalg.norm(a) * np.linalg.norm(b))
+    return a.dot(b) / (np.linalg.norm(a) * np.linalg.norm(b))
 
 
 def calc_principal_angels(A, B):
@@ -18,15 +18,15 @@ def calc_principal_angels(A, B):
 
 
 def principal_angle_distance(embeddings):
-    res = [scipy.linalg.orth(el[0]) for el in embeddings]
+    res = [scipy.linalg.orth(el) for el in embeddings]
 
     for el1 in res:
         for el2 in res:
             principal_angels_cos = calc_principal_angels(el1, el2)
             principal_angels = [math.degrees(math.acos(min(el, 1))) for el in principal_angels_cos]
             print(principal_angels_cos)
-            print(principal_angels)
-            print()
+            # print(principal_angels)
+            print("----")
 
 
 def get_as_numpy_array(file_path):

@@ -12,6 +12,7 @@ def get_as_numpy_array(file_path):
         return np.array(feature_array, dtype=float)
 
 
+
 def map_embeddings_to_consecutive(embs):
     mapping = {}
     arrays = []
@@ -23,7 +24,7 @@ def map_embeddings_to_consecutive(embs):
             mapping[int(feature[0])] = i
             feature_array[i] = feature[1:]
 
-    arrays.append(feature_array)
+    arrays.append(np.array(feature_array, dtype=float))
 
     for emb in embs[1:]:
         with open(emb) as file:
@@ -33,8 +34,7 @@ def map_embeddings_to_consecutive(embs):
             for i, feature in enumerate(features):
                 feature_array[mapping[int(feature[0])]] = feature[1:]
 
-        arrays.append(feature_array)
-
+        arrays.append(np.array(feature_array, dtype=float))
     return arrays
 
 
@@ -120,7 +120,8 @@ def reduce_node_ids(graph, labels):
     mapping = {}
     for i, node in enumerate(nodes):
         mapping[node] = i
-    return [(mapping[el[0]], mapping[el[1]]) for el in graph], [(mapping[label[0]], label[1]) for label in labels if mapping.get(label[0]) is not None]
+    return [(mapping[el[0]], mapping[el[1]]) for el in graph], [(mapping[label[0]], label[1]) for label in labels if
+                                                                mapping.get(label[0]) is not None]
 
 
 graph = get_edgelist_from_file('../graph/karate.edgelist')
