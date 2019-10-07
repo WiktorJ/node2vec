@@ -33,6 +33,7 @@ class Graph:
         self.q = q
         self.neighbors = {}
         self.edges_count = {}
+        self.start_nodes = {}
         for node in self.G.nodes:
             self.neighbors[node] = sorted(self.G.neighbors(node))
         self.log_stats = log_stats
@@ -148,20 +149,23 @@ class Graph:
     def update_edges_count(self, cur, prev, count, step, starting_node, batch_id):
         key = str((cur, prev))
         cur_count = self.edges_count.get(key)
+        cur_start = self.start_nodes.get(key)
         if not cur_count:
             self.edges_count[key] = {
                 "c": count,  # count
                 "sn": len(self.neighbors[cur]),  # source nodes
                 "tn": len(self.neighbors[prev]) if self.neighbors.get(prev) else 0,  # target nodes
-                "ta": {step: [count]},  # time access
-                "stn": {starting_node: 1},  # starting nodes
+                "ta": {step: [count]}  # time access
                 # "b": {batch_id: 1}  # batch id
+            }
+            self.start_nodes[key] = {
+                starting_node: 1  # starting nodes
             }
         else:
             cur_count['c'] += count
             cur_count['ta'][step] = cur_count['ta'].get(step, [])
             cur_count['ta'][step].append(count)
-            cur_count['stn'][starting_node] = cur_count['stn'].get(starting_node, 0) + 1
+            cur_start[starting_node] = cur_start.get(starting_node, 0) + 1
             # cur_count['b'][batch_id] = cur_count['b'].get(batch_id, 0) + 1
 
     def simulate_walks(self, num_walks, walk_length, concurrent_nodes=16, reuse_probability=0.6):
@@ -193,9 +197,11 @@ class Graph:
                 {"nodes": len(G.nodes()),
                  "edges": len(G.edges()),
                  "stats": self.edges_count})
-            with open(f"stats_{num_walks}_{walk_length}_{concurrent_nodes}_{reuse_probability}.json", 'w') as stat_file:
-                # pickle.dump(stats, stat_file)
+            stats_nodes = json.dumps(self.start_nodes)
+            with open(f"bias_edge_{num_walks}_{walk_length}_{concurrent_nodes}_{reuse_probability}.json", 'w') as stat_file:
                 stat_file.write(stats)
+            with open(f"bias_nodesÒ_{num_walks}_{walk_length}_{concurrent_nodes}_{reuse_probability}.json", 'w') as stat_file2:
+                stat_file2.write(stats_nodes)
         return walks
 
     def get_alias_edge(self, src, dst):
