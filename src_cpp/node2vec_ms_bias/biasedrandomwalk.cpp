@@ -165,7 +165,7 @@ void SimulateWalk(PWNet &InNet,
         }
     }
     uint64 current_length = 2;
-    std::vector<uint64> walk_lengths(NumWalk, 2);
+    std::vector<uint64> walk_lengths(current_walk_number, 2);
     while (!visit.empty()) {
         while (!visit.empty()) {
             auto previous_node = visit.back();
