@@ -108,7 +108,7 @@ int main(int argc, char *argv[]) {
     TStr InFile, OutFile;
     int Dimensions, WalkLen, NumWalks, WinSize, Iter;
     double ParamP, ParamQ, reuse_probability;
-    bool Directed, Weighted, Verbose, OutputWalks, dry_run,;
+    bool Directed, Weighted, Verbose, OutputWalks, dry_run;
     ParseArgs(argc, argv, InFile, OutFile, Dimensions, WalkLen, NumWalks, WinSize,
               Iter, Verbose, ParamP, ParamQ, Directed, Weighted, OutputWalks,
               reuse_probability, dry_run);
