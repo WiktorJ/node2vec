@@ -70,7 +70,7 @@ embeddings = ["lesmis_base", "lesmis_biased"]
 titles = ["Lesmis graph", "lesmis_biased"]
 # embeddings = ["karate_base", "karate_ms", "karate_bias"]
 # embeddings = ["email_base_loops", "email_biased_loops"]
-clusters = 5
+clusters = 6
 
 Xs = [get_as_numpy_array(f'../emb/{embedding}.emb') for embedding in embeddings]
 predictions = [cluster.KMeans(n_clusters=clusters, random_state=0).fit(X).labels_ for X in Xs]
