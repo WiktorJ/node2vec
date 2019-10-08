@@ -200,7 +200,7 @@ class Graph:
             stats_nodes = json.dumps(self.start_nodes)
             with open(f"bias_edge_{num_walks}_{walk_length}_{concurrent_nodes}_{reuse_probability}.json", 'w') as stat_file:
                 stat_file.write(stats)
-            with open(f"bias_nodesÒ_{num_walks}_{walk_length}_{concurrent_nodes}_{reuse_probability}.json", 'w') as stat_file2:
+            with open(f"bias_nodes_{num_walks}_{walk_length}_{concurrent_nodes}_{reuse_probability}.json", 'w') as stat_file2:
                 stat_file2.write(stats_nodes)
         return walks
 

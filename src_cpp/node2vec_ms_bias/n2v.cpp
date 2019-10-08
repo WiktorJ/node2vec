@@ -32,39 +32,22 @@ void node2vec(PWNet &InNet, const double &ParamP, const double &ParamQ,
 //#pragma omp parallel for schedule(dynamic)
     uint64 bit_field_size = 64;
     uint64 current_walk_number = 0;
-    if (reduced_bias) {
-        for (int i = 0; i < NIdsV.Len(); ++i) {
-            if (Verbose) {
-                printf("\rWalking Progress: %.2lf%%", (double) current_walk_number * 100 / (double) AllWalks);
-                fflush(stdout);
-            }
-            std::vector<uint64> start_nodes;
-            start_nodes.push_back(NIdsV[i]);
-            auto walks_left = NumWalks;
-            while (walks_left > 0) {
-                auto walks_count = walks_left > bit_field_size ? bit_field_size : walks_left;
-                SimulateWalkReducedBias(InNet, WalksVV, start_nodes, WalkLen, walks_count, Rnd, current_walk_number, previous_node,
-                             current_node, saved_step, is_dist_1, stats, reuse_prob);
-                current_walk_number += walks_count;
-                walks_left -= bit_field_size;
-            }
+
+    for (int i = 0; i < NIdsV.Len(); i+=2) {
+        if (Verbose) {
+            printf("\rWalking Progress: %.2lf%%", (double) current_walk_number * 100 / (double) AllWalks);
+            fflush(stdout);
         }
-    } else {
-        for (int i = 0; i < NIdsV.Len(); ++i) {
-            if (Verbose) {
-                printf("\rWalking Progress: %.2lf%%", (double) current_walk_number * 100 / (double) AllWalks);
-                fflush(stdout);
-            }
-            std::vector<uint64> start_nodes;
-            start_nodes.push_back(NIdsV[i]);
-            auto walks_left = NumWalks;
-            while (walks_left > 0) {
-                auto walks_count = walks_left > bit_field_size ? bit_field_size : walks_left;
-                SimulateWalk(InNet, WalksVV, start_nodes, WalkLen, walks_count, Rnd, current_walk_number, previous_node,
-                             current_node, saved_step, stats, reuse_prob);
-                current_walk_number += walks_count;
-                walks_left -= bit_field_size;
-            }
+        std::vector<uint64> start_nodes;
+        start_nodes.push_back(NIdsV[i]);
+        start_nodes.push_back(NIdsV[i+1]);
+        auto walks_left = NumWalks;
+        while (walks_left > 0) {
+            auto walks_count = walks_left > bit_field_size ? bit_field_size : walks_left;
+            SimulateWalk(InNet, WalksVV, start_nodes, WalkLen, walks_count, Rnd, current_walk_number, previous_node,
+                         current_node, saved_step, stats, reuse_prob);
+            current_walk_number += walks_count;
+            walks_left -= bit_field_size;
         }
     }
     auto walk_end_time = std::chrono::high_resolution_clock::now();

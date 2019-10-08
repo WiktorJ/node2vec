@@ -124,8 +124,8 @@ def reduce_node_ids(graph, labels):
                                                                 mapping.get(label[0]) is not None]
 
 
-graph = get_edgelist_from_file('../graph/karate.edgelist')
-save_edgelist_to_file('../graph/karate-fix.edgelist', [reduce_if_exceeds(el) for el in graph])
+graph = get_edgelist_from_file('../graph/lesmis.edgelist')
+save_edgelist_to_file('../graph/lesmis-fix.edgelist', [reduce_if_exceeds(el) for el in graph])
 # labels = get_edgelist_from_file('../labels/email-Eu-core-department-labels-nl.txt')
 # new_graph, new_labels = extract_communities(graph, labels, {2, 3, 5, 8, 9})
 # new_graph, new_labels = reduce_node_ids(new_graph, new_labels)

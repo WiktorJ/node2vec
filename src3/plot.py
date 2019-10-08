@@ -56,9 +56,9 @@ def get_different_assignments(labels1, labels2):
 
 
 
-# with open('../graph/lesmis.edgelist') as graph_file:
+with open('../graph/lesmis.edgelist') as graph_file:
 # with open('../graph/email-Eu-core-small-denominated.edgelist') as graph_file
-with open('../graph/karate.edgelist') as graph_file:
+# with open('../graph/karate.edgelist') as graph_file:
 # with open('../graph/email-Eu-core.txt') as graph_file:
     graph_csv = csv.reader(graph_file, delimiter=' ')
     for row in graph_csv:
@@ -66,10 +66,11 @@ with open('../graph/karate.edgelist') as graph_file:
 
 d = dict(nx.degree(G))
 
-# embeddings = ["lesmis_base", "lesmis_biased"]
-embeddings = ["karate_base", "karate_ms", "karate_bias"]
+embeddings = ["lesmis_base", "lesmis_biased"]
+titles = ["Lesmis graph", "lesmis_biased"]
+# embeddings = ["karate_base", "karate_ms", "karate_bias"]
 # embeddings = ["email_base_loops", "email_biased_loops"]
-clusters = 2
+clusters = 5
 
 Xs = [get_as_numpy_array(f'../emb/{embedding}.emb') for embedding in embeddings]
 predictions = [cluster.KMeans(n_clusters=clusters, random_state=0).fit(X).labels_ for X in Xs]
@@ -99,6 +100,7 @@ diff = get_different_assignments(predictions[0], predictions[1])
 # labels = {i: 'X' if i in diff else '' for i in range(len(G.nodes))}
 
 pos = nx.spring_layout(G)
+print(pos)
 # plt.title(embeddings[0])
 # nx.draw(G, pos=pos, node_list=d.keys(), node_size=[n * 2 for n in d.values()],
 #         node_color=predictions[0], width=0.05, with_labels=True, font_size=8)
@@ -116,11 +118,11 @@ print(f"estiated diff assigments: {len(diff) / len(G.nodes())}")
 # plt.show(dpi=1500)
 # plt.savefig("labels.pdf")
 for i in range(len(embeddings)):
-    plt.title(embeddings[i])
-    nx.draw(G, pos=pos, node_list=d.keys(), node_size=[n * 2 for n in d.values()],
-            node_color=mapped_predictions[i], width=0.5)
-    plt.show(dpi=1500)
-    # plt.savefig(f"{embeddings[i]}.pdf")
+    # plt.title(embeddings[i])
+    nx.draw(G, pos=pos, node_list=d.keys(), node_size=[(n * 3) + 3 for n in d.values()],
+            node_color=mapped_predictions[i], width=0.05)
+    # plt.show(dpi=1500)
+    plt.savefig(f"{embeddings[i]}.pdf")
 
 # plt.title(embeddings[1])
 # nx.draw(G, pos=pos, node_list=d.keys(), node_size=0.2,

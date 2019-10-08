@@ -19,21 +19,21 @@ config = {
     # 'input': '../graph/email-Eu-core-nl.edgelist',
     'input': '../graph/lesmis.edgelist',
     # 'output': '../emb/lesmis{}.emb',
-    'dimensions': 32,
-    'walk_length': 20,
-    'num_walks': 120,
+    'dimensions': 16,
+    'walk_length': 80,
+    'num_walks': 32,
     'window_size': 10,
     'iter': 10,
     'workers': 8,
-    'p': 0.5,
-    'q': 3,
+    'p': 1,
+    'q': 0.5,
     'weighted': False,
     'directed': False,
     'unweighted': True,
     'simulate_args': {
         'walk_length': 80,
-        'num_walks': 120,
-        'concurrent_nodes': 1
+        'num_walks': 32,
+        'concurrent_nodes': 2
     }
 }
 
@@ -94,7 +94,7 @@ outputs_base = [('../emb/lesmis' + str(i + 1) + '.emb', "base_" + str(i + 1)) fo
 # res = {}
 print("Base times")
 for el in [1]:
-    config['output'] = f"../emb/lesmis_base2.emb"
+    config['output'] = f"../emb/lesmis_base.emb"
     test(config, node2vec, config['simulate_args'])
 # #
 # print()
@@ -112,12 +112,12 @@ for el in [1]:
 
 print()
 print("biased walk")
-for el in [1]:
+for el in [2]:
     config['output'] = f"../emb/lesmis_biased.emb"
     sim_config = config['simulate_args']
-    sim_config['concurrent_nodes'] = el
+    # sim_config['concurrent_nodes'] = el
     sim_config['reuse_probability'] = 0.6
-    test(config, node2vec_ms_walk_biased, sim_config, True)
+    test(config, node2vec_ms_walk_biased, sim_config, False)
 
 # for i in range(10):
 #     test(config, node2vec_ms, 2**(i+1))
