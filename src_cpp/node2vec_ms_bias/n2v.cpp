@@ -25,7 +25,7 @@ void node2vec(PWNet &InNet, const double &ParamP, const double &ParamQ,
               const int &Dimensions, const int &WalkLen, const int &NumWalks,
               const int &WinSize, const int &Iter, const bool &Verbose,
               const bool &OutputWalks, TVVec<TInt, uint64> &WalksVV,
-              TIntFltVH &EmbeddingsHV, const double &reuse_prob, const bool &reduced_bias) {
+              TIntFltVH &EmbeddingsHV, const double &reuse_prob) {
     auto start_time = std::chrono::high_resolution_clock::now();
     //Preprocess transition probabilities
     PreprocessTransitionProbs(InNet, ParamP, ParamQ, Verbose);
@@ -60,7 +60,7 @@ void node2vec(PWNet &InNet, const double &ParamP, const double &ParamQ,
         dowalk(Verbose, current_walk_number, AllWalks, NIdsV, bit_field_size,
                NumWalks, InNet, WalksVV, WalkLen, Rnd,
                previous_node,
-               current_node, saved_step, reduced_bias, stats, start_nodes);
+               current_node, saved_step, reuse_prob, stats, start_nodes);
     }
     if (NIdsV.Len() % 2 == 1) {
         std::vector<uint64> start_nodes(1);
@@ -68,7 +68,7 @@ void node2vec(PWNet &InNet, const double &ParamP, const double &ParamQ,
         dowalk(Verbose, current_walk_number, AllWalks, NIdsV, bit_field_size,
                NumWalks, InNet, WalksVV, WalkLen, Rnd,
                previous_node,
-               current_node, saved_step, reduced_bias, stats, start_nodes);
+               current_node, saved_step, reuse_prob, stats, start_nodes);
     }
     auto walk_end_time = std::chrono::high_resolution_clock::now();
     if (!OutputWalks) {
