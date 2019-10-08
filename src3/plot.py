@@ -56,9 +56,9 @@ def get_different_assignments(labels1, labels2):
 
 
 
-with open('../graph/lesmis.edgelist') as graph_file:
+# with open('../graph/lesmis.edgelist') as graph_file:
 # with open('../graph/email-Eu-core-small-denominated.edgelist') as graph_file
-# with open('../graph/karate.edgelist') as graph_file:
+with open('../graph/karate.edgelist') as graph_file:
 # with open('../graph/email-Eu-core.txt') as graph_file:
     graph_csv = csv.reader(graph_file, delimiter=' ')
     for row in graph_csv:
@@ -66,11 +66,12 @@ with open('../graph/lesmis.edgelist') as graph_file:
 
 d = dict(nx.degree(G))
 
-embeddings = ["lesmis_base", "lesmis_biased"]
-titles = ["Lesmis graph", "lesmis_biased"]
-# embeddings = ["karate_base", "karate_ms", "karate_bias"]
+# embeddings = ["lesmis_base", "lesmis_biased"]
+# titles = ["Lesmis graph", "lesmis_biased"]
+embeddings = ["karate_base", "karate_biased"]
+# titles = ["Lesmis graph", "lesmis_biased"]
 # embeddings = ["email_base_loops", "email_biased_loops"]
-clusters = 6
+clusters = 2
 
 Xs = [get_as_numpy_array(f'../emb/{embedding}.emb') for embedding in embeddings]
 predictions = [cluster.KMeans(n_clusters=clusters, random_state=0).fit(X).labels_ for X in Xs]

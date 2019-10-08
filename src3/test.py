@@ -17,16 +17,17 @@ config = {
     # 'input': '../graph/artist_edges.edgelist',
     # 'input': '../graph/email-Eu-core.txt',
     # 'input': '../graph/email-Eu-core-nl.edgelist',
-    'input': '../graph/lesmis.edgelist',
+    # 'input': '../graph/lesmis.edgelist',
+    'input': '../graph/karate.edgelist',
     # 'output': '../emb/lesmis{}.emb',
-    'dimensions': 16,
-    'walk_length': 80,
-    'num_walks': 32,
+    'dimensions': 8,
+    'walk_length': 10,
+    'num_walks': 16,
     'window_size': 10,
     'iter': 10,
     'workers': 8,
-    'p': 1,
-    'q': 0.5,
+    'p': 0.5,
+    'q': 2,
     'weighted': False,
     'directed': False,
     'unweighted': True,
@@ -85,16 +86,16 @@ def test(config, impl, sim_config, log_stats=False):
 
 test_count = 1
 
-output_schema = '../emb/lesmis{}.emb',
-
-outputs_ms = [('../emb/lesmis' + str(i + 1) + '.emb', "MS_" + str(i + 1)) for i in range(test_count)]
-outputs_base = [('../emb/lesmis' + str(i + 1) + '.emb', "base_" + str(i + 1)) for i in
-                range(test_count, 2 * test_count)]
+# output_schema = '../emb/lesmis{}.emb',
+#
+# outputs_ms = [('../emb/lesmis' + str(i + 1) + '.emb', "MS_" + str(i + 1)) for i in range(test_count)]
+# outputs_base = [('../emb/lesmis' + str(i + 1) + '.emb', "base_" + str(i + 1)) for i in
+#                 range(test_count, 2 * test_count)]
 
 # res = {}
 print("Base times")
 for el in [1]:
-    config['output'] = f"../emb/lesmis_base.emb"
+    config['output'] = f"../emb/karate_base.emb"
     test(config, node2vec, config['simulate_args'])
 # #
 # print()
@@ -113,7 +114,7 @@ for el in [1]:
 print()
 print("biased walk")
 for el in [2]:
-    config['output'] = f"../emb/lesmis_biased.emb"
+    config['output'] = f"../emb/karate_biased.emb"
     sim_config = config['simulate_args']
     # sim_config['concurrent_nodes'] = el
     sim_config['reuse_probability'] = 0.6
