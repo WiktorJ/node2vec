@@ -182,7 +182,7 @@ void SimulateWalk(PWNet &InNet,
                     TIntVFltVPr *cur_data = nullptr;
                     while (indexes > 0) {
 //                        c++;
-                        int64 next_node;
+                        uint64 next_node;
                         if (saved_step[current_node] != -1 && dis(gen) < reuse_prob) {
                             next_node = saved_step[current_node];
                         } else {
