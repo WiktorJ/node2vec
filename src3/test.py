@@ -100,6 +100,7 @@ for input in ["../graph/facebook_combined.edgelist", "../graph/roadNet-PA-fix.tx
     config['input'] = input
     print(input)
     print("Base times")
+    config['simulate_args'].pop('reuse_probability', None)
     for el in [1]:
         config['output'] = f"../emb/karate_base.emb"
         test(config, node2vec, config['simulate_args'])
