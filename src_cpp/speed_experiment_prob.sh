@@ -7,7 +7,7 @@ p=0.5
 q=2
 r=32
 l=80
-declare -a arr=("-i:../graph/facebook_combined.edgelist -o:../emb/ls.em", "-i:../graph/roadNet-PA-fix.txt -o:../emb/r.em", "-i:../graph/twitter_combined-fix.txt -o:../emb/t.em",  "-i:../graph/com-youtube-fix.ungraph.txt -o:../emb/y.em",)
+declare -a arr=("-i:../graph/facebook_combined.edgelist -o:../emb/ls.em", "-i:../graph/roadNet-PA-fix.txt -o:../emb/r.em", "-i:../graph/twitter_combined-fix.txt -o:../emb/t.em",  "-i:../graph/com-youtube-fix.ungraph.txt -o:../emb/y.em")
 for paths in "${arr[@]}"
 do
     echo "Biased 0.1"

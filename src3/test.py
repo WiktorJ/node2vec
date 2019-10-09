@@ -77,7 +77,8 @@ def test(config, impl, sim_config, log_stats=False):
     walk_starts = time.time()
     walks = G.simulate_walks(**sim_config)
     walk_end = time.time()
-    print(f"Total Time: {walk_end - start}, Walk Time: {walk_end - walk_starts}, Concurrent walks: {sim_config['concurrent_nodes']}")
+    print(f"Total Time: {walk_end - start}, Walk Time: {walk_end - walk_starts}, Concurrent walks: {sim_config[
+        'concurrent_nodes']}")
     # emb = learn_embeddings(walks, config)
     # print(f"Emb Time: {time.time() - walk_end}")
     # print(f"Total Time: {time.time() - start}")
@@ -94,34 +95,38 @@ test_count = 1
 #                 range(test_count, 2 * test_count)]
 
 # res = {}
-print("Base times")
-for el in [1]:
-    config['output'] = f"../emb/karate_base.emb"
-    test(config, node2vec, config['simulate_args'])
-# #
-# print()
-# print("No hash grouping")
-# for el in [1]:
-#     config['output'] = f"../emb/karate_base.emb"
-#     test(config, node2vec_ms, config['simulate_args'])
-#
-# # print()
-# # print("Hash grouping")
-# # for el in [1, 4, 8, 16, 32, 64, 128]:
-# for el in [2]:
-#     sim_config = config['simulate_args']
-#     sim_config['concurrent_nodes'] = el
-#     test(config, node2vec_ms_walk, sim_config, False)
+for input in ["../graph/facebook_combined.edgelist", "../graph/roadNet-PA-fix.txt", "../graph/twitter_combined-fix.txt", "../graph/com-youtube-fix.ungraph.txt"]:
+    config['input'] = input
+    print(input)
+    print("Base times")
+    for el in [1]:
+        config['output'] = f"../emb/karate_base.emb"
+        test(config, node2vec, config['simulate_args'])
+    # #
+    # print()
+    print("No hash grouping")
+    for el in [1]:
+        config['output'] = f"../emb/karate_base.emb"
+        test(config, node2vec_ms, config['simulate_args'])
+    #
+    # # print()
+    # # print("Hash grouping")
+    # # for el in [1, 4, 8, 16, 32, 64, 128]:
+    # for el in [2]:
+    #     sim_config = config['simulate_args']
+    #     sim_config['concurrent_nodes'] = el
+    #     test(config, node2vec_ms_walk, sim_config, False)
 
-print()
-print("biased walk")
-for el in [2]:
-    config['output'] = f"../emb/karate_biased.emb"
-    sim_config = config['simulate_args']
-    # sim_config['concurrent_nodes'] = el
-    sim_config['reuse_probability'] = 0.4
-    test(config, node2vec_ms_walk_biased, sim_config, False)
-
+    print("biased walk")
+    for el in [0.2, 0.4, 0.6, 0.8]:
+        config['output'] = f"../emb/karate_biased.emb"
+        sim_config = config['simulate_args']
+        # sim_config['concurrent_nodes'] = el
+        sim_config['reuse_probability'] = el
+        test(config, node2vec_ms_walk_biased, sim_config, False)
+    print("-------------------------------------")
+    print("-------------------------------------")
+    print("-------------------------------------")
 # for i in range(10):
 #     test(config, node2vec_ms, 2**(i+1))
 
