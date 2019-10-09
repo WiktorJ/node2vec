@@ -21,8 +21,8 @@ config = {
     # 'input': '../graph/karate.edgelist',
     # 'output': '../emb/lesmis{}.emb',
     'dimensions': 8,
-    'walk_length': 80,
-    'num_walks': 32,
+    'walk_length': 100,
+    'num_walks': 120,
     'window_size': 10,
     'iter': 10,
     'workers': 8,
@@ -74,9 +74,10 @@ def test(config, impl, sim_config, log_stats=False):
     nx_G = read_graph(config)
     G = impl.Graph(nx_G, config['directed'], config['p'], config['q'], log_stats)
     G.preprocess_transition_probs()
+    walk_starts = time.time()
     walks = G.simulate_walks(**sim_config)
     walk_end = time.time()
-    print(f"Walk Time: {walk_end - start}, Concurrent walks: {sim_config['concurrent_nodes']}")
+    print(f"Total Time: {walk_end - start}, Walk Time: {walk_end - walk_starts}, Concurrent walks: {sim_config['concurrent_nodes']}")
     # emb = learn_embeddings(walks, config)
     # print(f"Emb Time: {time.time() - walk_end}")
     # print(f"Total Time: {time.time() - start}")
@@ -99,18 +100,18 @@ for el in [1]:
     test(config, node2vec, config['simulate_args'])
 # #
 # print()
-print("No hash grouping")
-for el in [1]:
-    config['output'] = f"../emb/karate_base.emb"
-    test(config, node2vec_ms, config['simulate_args'])
-
-# print()
-# print("Hash grouping")
-# for el in [1, 4, 8, 16, 32, 64, 128]:
-for el in [2]:
-    sim_config = config['simulate_args']
-    sim_config['concurrent_nodes'] = el
-    test(config, node2vec_ms_walk, sim_config, False)
+# print("No hash grouping")
+# for el in [1]:
+#     config['output'] = f"../emb/karate_base.emb"
+#     test(config, node2vec_ms, config['simulate_args'])
+#
+# # print()
+# # print("Hash grouping")
+# # for el in [1, 4, 8, 16, 32, 64, 128]:
+# for el in [2]:
+#     sim_config = config['simulate_args']
+#     sim_config['concurrent_nodes'] = el
+#     test(config, node2vec_ms_walk, sim_config, False)
 
 print()
 print("biased walk")
@@ -118,7 +119,7 @@ for el in [2]:
     config['output'] = f"../emb/karate_biased.emb"
     sim_config = config['simulate_args']
     # sim_config['concurrent_nodes'] = el
-    sim_config['reuse_probability'] = 0.6
+    sim_config['reuse_probability'] = 0.9
     test(config, node2vec_ms_walk_biased, sim_config, False)
 
 # for i in range(10):

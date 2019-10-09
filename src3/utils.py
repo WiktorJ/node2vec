@@ -100,7 +100,7 @@ def delete_loops(array):
 
 def get_edgelist_from_file(file_path):
     with open(file_path) as file:
-        return [tuple(map(int, el)) for el in csv.reader(file, delimiter='\t')]
+        return [tuple(map(int, el)) for el in csv.reader(file, delimiter=' ')]
 
 
 def save_edgelist_to_file(file_path, edgelist):
@@ -124,12 +124,12 @@ def reduce_node_ids(graph, labels):
                                                                 mapping.get(label[0]) is not None]
 
 
-graph = get_edgelist_from_file('../graph/roadNet-PA.txt')
+graph = get_edgelist_from_file('../graph/twitter_combined.txt')
 # save_edgelist_to_file('../graph/lesmis-fix.edgelist', [reduce_if_exceeds(el) for el in graph])
 # labels = get_edgelist_from_file('../labels/email-Eu-core-department-labels-nl.txt')
 # new_graph, new_labels = extract_communities(graph, labels, {2, 3, 5, 8, 9})
 # new_graph, new_labels = reduce_node_ids(graph, [])
-save_edgelist_to_file('../graph/roadNet-PA-fix.txt', reduce_node_ids(graph, [])[0])
+save_edgelist_to_file('../graph/twitter_combined-fix.txt', reduce_node_ids(graph, [])[0])
 # edgelist = get_edgelist_from_file('../graph/email-Eu-core-nl.edgelist')
 # save_edgelist_to_file('../graph/email-Eu-core-small.edgelist', extract_communities(edgelist, labels, {2, 3, 5, 8, 9}))
 # labels_d = delete_looped_labels(edgelist, labels)
