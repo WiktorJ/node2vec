@@ -188,11 +188,11 @@ class Graph:
                                         reuse_probability=reuse_probability)
             batch += 1
 
-        for v1 in self.edges_count.values():
-            for step in set(v1['ta'].keys()):
-                v1['ta'][step] = round(sum(v1['ta'][step]) / len(v1['ta'][step]), 1)
 
         if self.log_stats:
+            for v1 in self.edges_count.values():
+                for step in set(v1['ta'].keys()):
+                    v1['ta'][step] = round(sum(v1['ta'][step]) / len(v1['ta'][step]), 1)
             stats = json.dumps(
                 {"nodes": len(G.nodes()),
                  "edges": len(G.edges()),

@@ -13,16 +13,16 @@ from distance import get_matrixs, calc_matrix_norm, cluster_distance
 import node2vec_ms_walk_biased
 
 config = {
-    # 'input': '../graph/facebook_combined.edgelist',
+    'input': '../graph/facebook_combined.edgelist',
     # 'input': '../graph/artist_edges.edgelist',
     # 'input': '../graph/email-Eu-core.txt',
     # 'input': '../graph/email-Eu-core-nl.edgelist',
     # 'input': '../graph/lesmis.edgelist',
-    'input': '../graph/karate.edgelist',
+    # 'input': '../graph/karate.edgelist',
     # 'output': '../emb/lesmis{}.emb',
     'dimensions': 8,
-    'walk_length': 10,
-    'num_walks': 16,
+    'walk_length': 80,
+    'num_walks': 32,
     'window_size': 10,
     'iter': 10,
     'workers': 8,
@@ -77,11 +77,11 @@ def test(config, impl, sim_config, log_stats=False):
     walks = G.simulate_walks(**sim_config)
     walk_end = time.time()
     print(f"Walk Time: {walk_end - start}, Concurrent walks: {sim_config['concurrent_nodes']}")
-    emb = learn_embeddings(walks, config)
-    print(f"Emb Time: {time.time() - walk_end}")
-    print(f"Total Time: {time.time() - start}")
-    return emb
-    # return 1
+    # emb = learn_embeddings(walks, config)
+    # print(f"Emb Time: {time.time() - walk_end}")
+    # print(f"Total Time: {time.time() - start}")
+    # return emb
+    return 1
 
 
 test_count = 1
@@ -99,17 +99,18 @@ for el in [1]:
     test(config, node2vec, config['simulate_args'])
 # #
 # print()
-# print("No hash grouping")
-# for el in [1]:
-#     test(config, node2vec_ms, el)
+print("No hash grouping")
+for el in [1]:
+    config['output'] = f"../emb/karate_base.emb"
+    test(config, node2vec_ms, config['simulate_args'])
 
 # print()
 # print("Hash grouping")
 # for el in [1, 4, 8, 16, 32, 64, 128]:
-# for el in [2]:
-#     sim_config = config['simulate_args']
-#     sim_config['concurrent_nodes'] = el
-#     test(config, node2vec_ms_walk, sim_config, True)
+for el in [2]:
+    sim_config = config['simulate_args']
+    sim_config['concurrent_nodes'] = el
+    test(config, node2vec_ms_walk, sim_config, False)
 
 print()
 print("biased walk")
