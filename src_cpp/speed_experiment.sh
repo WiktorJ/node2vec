@@ -11,19 +11,19 @@ declare -a arr=("-i:../graph/facebook_combined.edgelist -o:../emb/ls.em", "-i:..
 for paths in "${arr[@]}"
 do
     echo ${paths}
-    echo "base"
+    printf "\nbase"
     build/node2vec/node2vec ${paths} -l:${l} -p:${p} -q:${q}  -r:${r} ${flags}
-    echo "MS"
+    printf "\nMS"
     build/node2vec_ms/node2vec_ms ${paths} -l:${l} -p:${p} -q:${q}  -r:${r} ${flags}
-    echo "Biased 0.2"
+    printf "\nBiased 0.2"
     build/node2vec_ms_bias/node2vec_ms_bias ${paths} -l:${l} -p:${p} -q:${q}  -r:${r} -rb:0.2 ${flags}
-    echo "Biased 0.4"
+    printf "\nBiased 0.4"
     build/node2vec_ms_bias/node2vec_ms_bias ${paths} -l:${l} -p:${p} -q:${q}  -r:${r} -rb:0.4 ${flags}
-    echo "Biased 0.6"
+    printf "\nBiased 0.6"
     build/node2vec_ms_bias/node2vec_ms_bias ${paths} -l:${l} -p:${p} -q:${q}  -r:${r} -rb:0.6 ${flags}
-    echo "Biased 0.8"
+    printf "\nBiased 0.8"
     build/node2vec_ms_bias/node2vec_ms_bias ${paths} -l:${l} -p:${p} -q:${q}  -r:${r} -rb:0.8 ${flags}
-    echo "------------------------------------------------"
-    echo "------------------------------------------------"
-    echo "------------------------------------------------"
+    printf "\n------------------------------------------------"
+    printf "\n------------------------------------------------"
+    printf "\n------------------------------------------------"
 done
