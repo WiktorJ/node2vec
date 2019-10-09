@@ -22,7 +22,7 @@ config = {
     # 'output': '../emb/lesmis{}.emb',
     'dimensions': 8,
     'walk_length': 100,
-    'num_walks': 120,
+    'num_walks': 32,
     'window_size': 10,
     'iter': 10,
     'workers': 8,
@@ -32,7 +32,7 @@ config = {
     'directed': False,
     'unweighted': True,
     'simulate_args': {
-        'walk_length': 80,
+        'walk_length': 100,
         'num_walks': 32,
         'concurrent_nodes': 2
     }
@@ -77,8 +77,9 @@ def test(config, impl, sim_config, log_stats=False):
     walk_starts = time.time()
     walks = G.simulate_walks(**sim_config)
     walk_end = time.time()
-    print(f"Total Time: {walk_end - start}, Walk Time: {walk_end - walk_starts}, Concurrent walks: {sim_config[
-        'concurrent_nodes']}")
+    print(f"Total Time: {walk_end - start}, Walk Time: {walk_end - walk_starts}, "
+          f"Concurrent walks: {sim_config['concurrent_nodes']}")
+
     # emb = learn_embeddings(walks, config)
     # print(f"Emb Time: {time.time() - walk_end}")
     # print(f"Total Time: {time.time() - start}")
@@ -117,12 +118,12 @@ for input in ["../graph/facebook_combined.edgelist", "../graph/roadNet-PA-fix.tx
     #     sim_config['concurrent_nodes'] = el
     #     test(config, node2vec_ms_walk, sim_config, False)
 
-    print("biased walk")
     for el in [0.2, 0.4, 0.6, 0.8]:
         config['output'] = f"../emb/karate_biased.emb"
         sim_config = config['simulate_args']
         # sim_config['concurrent_nodes'] = el
         sim_config['reuse_probability'] = el
+        print(f"biased walk: {el}")
         test(config, node2vec_ms_walk_biased, sim_config, False)
     print("-------------------------------------")
     print("-------------------------------------")
