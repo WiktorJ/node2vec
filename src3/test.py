@@ -119,7 +119,7 @@ for el in [2]:
     config['output'] = f"../emb/karate_biased.emb"
     sim_config = config['simulate_args']
     # sim_config['concurrent_nodes'] = el
-    sim_config['reuse_probability'] = 0.9
+    sim_config['reuse_probability'] = 0.4
     test(config, node2vec_ms_walk_biased, sim_config, False)
 
 # for i in range(10):
