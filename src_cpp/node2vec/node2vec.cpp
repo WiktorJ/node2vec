@@ -10,7 +10,7 @@ void ParseArgs(int &argc, char *argv[], TStr &InFile, TStr &OutFile,
                int &Dimensions, int &WalkLen, int &NumWalks, int &WinSize, int &Iter,
                bool &Verbose, double &ParamP, double &ParamQ, bool &Directed, bool &Weighted,
                bool &OutputWalks, bool &dry_run) {
-    Env = TEnv(argc, argv, TNotify::StdNotify);
+    Env = TEnv(argc, argv);
     Env.PrepArgs(TStr::Fmt("\nAn algorithmic framework for representational learning on graphs."));
     InFile = Env.GetIfArgPrefixStr("-i:", "graph/karate.edgelist",
                                    "Input graph path");
