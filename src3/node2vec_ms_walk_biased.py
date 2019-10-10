@@ -37,6 +37,8 @@ class Graph:
         for node in self.G.nodes:
             self.neighbors[node] = sorted(self.G.neighbors(node))
         self.log_stats = log_stats
+        self.three_in_row = {}
+        self.four_in_row = {}
 
     def neighbor_chunker(self, n):
         neighbors = set(self.neighbors.keys())
@@ -131,6 +133,7 @@ class Graph:
                 cur_nbrs = self.neighbors[current_node]
                 if self.log_stats:
                     self.update_edges_count(current_node, previous_node, len(walks), len(walks[0]), walks[0][0],
+                                            walks[0],
                                             batch_id)
                 if len(cur_nbrs) > 0:
                     if len(walks[0]) == 1:
@@ -146,7 +149,7 @@ class Graph:
 
         return completed_walks
 
-    def update_edges_count(self, cur, prev, count, step, starting_node, batch_id):
+    def update_edges_count(self, cur, prev, count, step, starting_node, walk, batch_id):
         key = str((cur, prev))
         cur_count = self.edges_count.get(key)
         cur_start = self.start_nodes.get(key)
@@ -167,6 +170,12 @@ class Graph:
             cur_count['ta'][step].append(count)
             cur_start[starting_node] = cur_start.get(starting_node, 0) + 1
             # cur_count['b'][batch_id] = cur_count['b'].get(batch_id, 0) + 1
+        if len(walk) > 2:
+            t_key = str((walk[-3], walk[-2], walk[-1]))
+            self.three_in_row[t_key] = self.three_in_row.get(t_key, 0) + 1
+        if len(walk) > 3:
+            f_key = str((walk[-4], walk[-3], walk[-2], walk[-1]))
+            self.three_in_row[f_key] = self.three_in_row.get(f_key, 0) + 1
 
     def simulate_walks(self, num_walks, walk_length, concurrent_nodes=16, reuse_probability=0.6):
         '''
@@ -188,7 +197,6 @@ class Graph:
                                         reuse_probability=reuse_probability)
             batch += 1
 
-
         if self.log_stats:
             for v1 in self.edges_count.values():
                 for step in set(v1['ta'].keys()):
@@ -198,10 +206,14 @@ class Graph:
                  "edges": len(G.edges()),
                  "stats": self.edges_count})
             stats_nodes = json.dumps(self.start_nodes)
-            with open(f"bias_edge_{num_walks}_{walk_length}_{concurrent_nodes}_{reuse_probability}.json", 'w') as stat_file:
+            with open(f"bias_edge_{num_walks}_{walk_length}_{reuse_probability}.json", 'w') as stat_file:
                 stat_file.write(stats)
-            with open(f"bias_nodes_{num_walks}_{walk_length}_{concurrent_nodes}_{reuse_probability}.json", 'w') as stat_file2:
+            with open(f"bias_nodes_{num_walks}_{walk_length}_{reuse_probability}.json", 'w') as stat_file2:
                 stat_file2.write(stats_nodes)
+            with open(f"three_count_{num_walks}_{walk_length}_{reuse_probability}.json", 'w') as stat_file3:
+                stat_file3.write(json.dumps(self.three_in_row))
+            with open(f"four_count_{num_walks}_{walk_length}_{reuse_probability}.json", 'w') as stat_file4:
+                stat_file4.write(json.dumps(self.four_in_row))
         return walks
 
     def get_alias_edge(self, src, dst):

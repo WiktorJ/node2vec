@@ -120,8 +120,8 @@ print(f"estiated diff assigments: {len(diff) / len(G.nodes())}")
 # plt.savefig("labels.pdf")
 for i in range(len(embeddings)):
     # plt.title(embeddings[i])
-    nx.draw(G, pos=pos, node_list=d.keys(), node_size=[(n * 3) + 3 for n in d.values()],
-            node_color=mapped_predictions[i], width=0.05)
+    nx.draw(G, pos=pos, node_list=d.keys(), node_size=[(n * 5) + 20 for n in d.values()],
+            node_color=mapped_predictions[i], width=0.001)
     # plt.show(dpi=1500)
     plt.savefig(f"{embeddings[i]}.pdf")
 
