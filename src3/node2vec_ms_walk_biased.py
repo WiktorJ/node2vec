@@ -205,15 +205,15 @@ class Graph:
                 {"nodes": len(G.nodes()),
                  "edges": len(G.edges()),
                  "stats": self.edges_count})
-            stats_nodes = json.dumps(self.start_nodes)
-            with open(f"bias_edge_{num_walks}_{walk_length}_{reuse_probability}.json", 'w') as stat_file:
+            # stats_nodes = json.dumps(self.start_nodes)
+            with open(f"bias_edge_{num_walks}_{walk_length}_{concurrent_nodes}_{reuse_probability}.json", 'w') as stat_file:
                 stat_file.write(stats)
-            with open(f"bias_nodes_{num_walks}_{walk_length}_{reuse_probability}.json", 'w') as stat_file2:
-                stat_file2.write(stats_nodes)
-            with open(f"three_count_{num_walks}_{walk_length}_{reuse_probability}.json", 'w') as stat_file3:
-                stat_file3.write(json.dumps(self.three_in_row))
-            with open(f"four_count_{num_walks}_{walk_length}_{reuse_probability}.json", 'w') as stat_file4:
-                stat_file4.write(json.dumps(self.four_in_row))
+            # with open(f"bias_nodes_{num_walks}_{walk_length}_{concurrent_nodes}_{reuse_probability}.json", 'w') as stat_file2:
+            #     stat_file2.write(stats_nodes)
+            # with open(f"three_count_{num_walks}_{walk_length}_{concurrent_nodes}_{reuse_probability}.json", 'w') as stat_file3:
+            #     stat_file3.write(json.dumps(self.three_in_row))
+            # with open(f"four_count_{num_walks}_{walk_length}_{concurrent_nodes}_{reuse_probability}.json", 'w') as stat_file4:
+            #     stat_file4.write(json.dumps(self.four_in_row))
         return walks
 
     def get_alias_edge(self, src, dst):

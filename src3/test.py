@@ -13,12 +13,12 @@ from distance import get_matrixs, calc_matrix_norm, cluster_distance
 import node2vec_ms_walk_biased
 
 config = {
-    # 'input': '../graph/facebook_combined.edgelist',
+    'input': '../graph/facebook_combined.edgelist',
     # 'input': '../graph/artist_edges.edgelist',
     # 'input': '../graph/email-Eu-core.txt',
     # 'input': '../graph/email-Eu-core-nl.edgelist',
     # 'input': '../graph/lesmis.edgelist',
-    'input': '../graph/karate.edgelist',
+    # 'input': '../graph/karate.edgelist',
     # 'output': '../emb/lesmis{}.emb',
     'dimensions': 8,
     'walk_length': 100,
@@ -34,7 +34,7 @@ config = {
     'simulate_args': {
         'walk_length': 100,
         'num_walks': 32,
-        'concurrent_nodes': 2
+        'concurrent_nodes': 16
     }
 }
 
