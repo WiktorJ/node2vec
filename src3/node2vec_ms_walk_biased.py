@@ -114,14 +114,13 @@ class Graph:
     def get_prev(self, walk):
         return walk[-2] if len(walk) > 1 else -1
 
-    def node2vec_walk(self, walk_length, start_nodes, num_walks, batch_id, reuse_probability):
+    def node2vec_walk(self, walk_length, start_nodes, num_walks, batch_id, reuse_probability, saved_step):
         '''
         Simulate a random walk starting from start node.
         '''
 
         visit_dict = {}
         visit_dict_next = {}
-        saved_step = {}
         completed_walks = []
         G = self.G
 
@@ -151,24 +150,24 @@ class Graph:
 
     def update_edges_count(self, cur, prev, count, step, starting_node, walk, batch_id):
         key = str((cur, prev))
-        # cur_count = self.edges_count.get(key)
+        cur_count = self.edges_count.get(key)
         # cur_start = self.start_nodes.get(key)
-        # if not cur_count:
-        #     self.edges_count[key] = {
-        #         "c": count,  # count
-        #         "sn": len(self.neighbors[cur]),  # source nodes
-        #         "tn": len(self.neighbors[prev]) if self.neighbors.get(prev) else 0,  # target nodes
-        #         "ta": {step: [count]}  # time access
-        #         # "b": {batch_id: 1}  # batch id
-        #     }
-        #     self.start_nodes[key] = {
-        #         starting_node: 1  # starting nodes
-        #     }
-        # else:
-        #     cur_count['c'] += count
-        #     cur_count['ta'][step] = cur_count['ta'].get(step, [])
-        #     cur_count['ta'][step].append(count)
-        #     cur_start[starting_node] = cur_start.get(starting_node, 0) + 1
+        if not cur_count:
+            self.edges_count[key] = {
+                "c": count,  # count
+                "sn": len(self.neighbors[cur]),  # source nodes
+                "tn": len(self.neighbors[prev]) if self.neighbors.get(prev) else 0,  # target nodes
+                "ta": {step: [count]}  # time access
+                # "b": {batch_id: 1}  # batch id
+            }
+            self.start_nodes[key] = {
+                starting_node: 1  # starting nodes
+            }
+        else:
+            cur_count['c'] += count
+            cur_count['ta'][step] = cur_count['ta'].get(step, [])
+            cur_count['ta'][step].append(count)
+            # cur_start[starting_node] = cur_start.get(starting_node, 0) + 1
             # cur_count['b'][batch_id] = cur_count['b'].get(batch_id, 0) + 1
         if len(walk) > 2:
             t_key = str((walk[-3], walk[-2], walk[-1]))
@@ -186,6 +185,7 @@ class Graph:
         nodes = list(G.nodes())
         random.shuffle(nodes)
         batch = 0
+        saved_step = {}
         for node_chunk in self.neighbor_chunker(concurrent_nodes):
             # if batch % 1000 == 0:
             #     print(f"total nodes: {len(nodes)}, processed: {concurrent_nodes * batch}")
@@ -194,20 +194,21 @@ class Graph:
                                         start_nodes=start_nodes,
                                         num_walks=num_walks,
                                         batch_id=batch,
-                                        reuse_probability=reuse_probability)
+                                        reuse_probability=reuse_probability,
+                                        saved_step=saved_step)
             batch += 1
 
         if self.log_stats:
             for v1 in self.edges_count.values():
                 for step in set(v1['ta'].keys()):
                     v1['ta'][step] = round(sum(v1['ta'][step]) / len(v1['ta'][step]), 1)
-            # stats = json.dumps(
-            #     {"nodes": len(G.nodes()),
-            #      "edges": len(G.edges()),
-            #      "stats": self.edges_count})
+            stats = json.dumps(
+                {"nodes": len(G.nodes()),
+                 "edges": len(G.edges()),
+                 "stats": self.edges_count})
             # stats_nodes = json.dumps(self.start_nodes)
-            # with open(f"bias_edge_{num_walks}_{walk_length}_{concurrent_nodes}_{reuse_probability}.json", 'w') as stat_file:
-            #     stat_file.write(stats)
+            with open(f"bias_edge_{num_walks}_{walk_length}_{concurrent_nodes}_{reuse_probability}.json", 'w') as stat_file:
+                stat_file.write(stats)
             # with open(f"bias_nodes_{num_walks}_{walk_length}_{concurrent_nodes}_{reuse_probability}.json", 'w') as stat_file2:
             #     stat_file2.write(stats_nodes)
             with open(f"three_count_{num_walks}_{walk_length}_{concurrent_nodes}_{reuse_probability}.json", 'w') as stat_file3:
