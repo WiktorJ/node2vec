@@ -169,12 +169,12 @@ class Graph:
             cur_count['ta'][step].append(count)
             # cur_start[starting_node] = cur_start.get(starting_node, 0) + 1
             # cur_count['b'][batch_id] = cur_count['b'].get(batch_id, 0) + 1
-        if len(walk) > 2:
-            t_key = str((walk[-3], walk[-2], walk[-1]))
-            self.three_in_row[t_key] = self.three_in_row.get(t_key, 0) + 1
-        if len(walk) > 3:
-            f_key = str((walk[-4], walk[-3], walk[-2], walk[-1]))
-            self.four_in_row[f_key] = self.four_in_row.get(f_key, 0) + 1
+        # if len(walk) > 2:
+        #     t_key = str((walk[-3], walk[-2], walk[-1]))
+        #     self.three_in_row[t_key] = self.three_in_row.get(t_key, 0) + 1
+        # if len(walk) > 3:
+        #     f_key = str((walk[-4], walk[-3], walk[-2], walk[-1]))
+        #     self.four_in_row[f_key] = self.four_in_row.get(f_key, 0) + 1
 
     def simulate_walks(self, num_walks, walk_length, concurrent_nodes=16, reuse_probability=0.6):
         '''
@@ -211,10 +211,10 @@ class Graph:
                 stat_file.write(stats)
             # with open(f"bias_nodes_{num_walks}_{walk_length}_{concurrent_nodes}_{reuse_probability}.json", 'w') as stat_file2:
             #     stat_file2.write(stats_nodes)
-            with open(f"three_count_{num_walks}_{walk_length}_{concurrent_nodes}_{reuse_probability}.json", 'w') as stat_file3:
-                stat_file3.write(json.dumps(self.three_in_row))
-            with open(f"four_count_{num_walks}_{walk_length}_{concurrent_nodes}_{reuse_probability}.json", 'w') as stat_file4:
-                stat_file4.write(json.dumps(self.four_in_row))
+            # with open(f"three_count_{num_walks}_{walk_length}_{concurrent_nodes}_{reuse_probability}.json", 'w') as stat_file3:
+                # stat_file3.write(json.dumps(self.three_in_row))
+            # with open(f"four_count_{num_walks}_{walk_length}_{concurrent_nodes}_{reuse_probability}.json", 'w') as stat_file4:
+            #     stat_file4.write(json.dumps(self.four_in_row))
         return walks
 
     def get_alias_edge(self, src, dst):
