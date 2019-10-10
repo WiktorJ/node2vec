@@ -125,6 +125,7 @@ cmake-build-debug
 #
 
 
-notebooks/data*
+notebooks/data
+notebooks/data_exp
 src3/*.pdf
 *.pkl
