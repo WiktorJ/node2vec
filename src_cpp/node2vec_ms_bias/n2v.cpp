@@ -49,27 +49,26 @@ void node2vec(PWNet &InNet, const double &ParamP, const double &ParamQ,
     uint64 bit_field_size = 64;
     uint64 current_walk_number = 0;
 
-    for (int i = 0; i < NIdsV.Len() - (NIdsV.Len() % 2); i += 2) {
+    for (int i = 0; i < NIdsV.Len() - (NIdsV.Len() % 2); i++) {
         if (Verbose) {
             printf("\rWalking Progress: %.2lf%%", (double) current_walk_number * 100 / (double) AllWalks);
             fflush(stdout);
         }
-        std::vector<uint64> start_nodes(2);
+        std::vector<uint64> start_nodes;
         start_nodes[0] = NIdsV[i];
-        start_nodes[1] = NIdsV[i + 1];
         dowalk(Verbose, current_walk_number, AllWalks, NIdsV, bit_field_size,
                NumWalks, InNet, WalksVV, WalkLen, Rnd,
                previous_node,
                current_node, saved_step, reuse_prob, stats, start_nodes);
     }
-    if (NIdsV.Len() % 2 == 1) {
-        std::vector<uint64> start_nodes(1);
-        start_nodes.push_back(NIdsV[NIdsV.Len() - 1]);
-        dowalk(Verbose, current_walk_number, AllWalks, NIdsV, bit_field_size,
-               NumWalks, InNet, WalksVV, WalkLen, Rnd,
-               previous_node,
-               current_node, saved_step, reuse_prob, stats, start_nodes);
-    }
+//    if (NIdsV.Len() % 2 == 1) {
+//        std::vector<uint64> start_nodes(1);
+//        start_nodes.push_back(NIdsV[NIdsV.Len() - 1]);
+//        dowalk(Verbose, current_walk_number, AllWalks, NIdsV, bit_field_size,
+//               NumWalks, InNet, WalksVV, WalkLen, Rnd,
+//               previous_node,
+//               current_node, saved_step, reuse_prob, stats, start_nodes);
+//    }
     auto walk_end_time = std::chrono::high_resolution_clock::now();
     if (!OutputWalks) {
         LearnEmbeddings(WalksVV, Dimensions, WinSize, Iter, Verbose, EmbeddingsHV);

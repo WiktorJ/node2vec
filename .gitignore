@@ -127,5 +127,6 @@ cmake-build-debug
 
 notebooks/data
 notebooks/data_exp
+notebooks/*.pdf
 src3/*.pdf
 *.pkl
