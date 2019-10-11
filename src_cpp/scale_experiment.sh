@@ -7,7 +7,7 @@ p=0.5
 q=2
 r=32
 l=100
-declare -a arr=("er_graph_1024","er_graph_2048","er_graph_4096","er_graph_8192","er_graph_16384","er_graph_32768","er_graph_65536","er_graph_131072")
+declare -a arr=("er_graph_1024" "er_graph_2048" "er_graph_4096" "er_graph_8192" "er_graph_16384" "er_graph_32768" "er_graph_65536" "er_graph_131072")
 for paths in "${arr[@]}"
 do
     echo ${paths}

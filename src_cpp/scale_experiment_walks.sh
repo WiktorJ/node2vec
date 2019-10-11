@@ -7,7 +7,7 @@ p=0.5
 q=2
 r=32
 l=100
-declare -a arr=(16, 32, 64, 128, 256, 512, 1024)
+declare -a arr=(16 32 64 128 256 512 1024)
 for walks in "${arr[@]}"
 do
     echo ${walks}
