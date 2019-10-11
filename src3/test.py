@@ -34,7 +34,7 @@ config = {
     'simulate_args': {
         'walk_length': 100,
         'num_walks': 32,
-        'concurrent_nodes': 16
+        'concurrent_nodes': 2
     }
 }
 
