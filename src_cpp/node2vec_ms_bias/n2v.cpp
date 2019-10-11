@@ -54,7 +54,7 @@ void node2vec(PWNet &InNet, const double &ParamP, const double &ParamQ,
             printf("\rWalking Progress: %.2lf%%", (double) current_walk_number * 100 / (double) AllWalks);
             fflush(stdout);
         }
-        std::vector<uint64> start_nodes;
+        std::vector<uint64> start_nodes(1);
         start_nodes[0] = NIdsV[i];
         dowalk(Verbose, current_walk_number, AllWalks, NIdsV, bit_field_size,
                NumWalks, InNet, WalksVV, WalkLen, Rnd,

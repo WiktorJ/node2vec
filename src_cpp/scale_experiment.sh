@@ -12,9 +12,9 @@ for paths in "${arr[@]}"
 do
     echo ${paths}
     printf "\n\nbase\n"
-    build/node2vec/node2vec "-i:../graph/${paths} -o:../emb/ls.em" -l:${l} -p:${p} -q:${q}  -r:${r} ${flags}
+    build/node2vec/node2vec -i:../graph/${paths} -o:../emb/ls.em -l:${l} -p:${p} -q:${q}  -r:${r} ${flags}
     printf "\n\nBiased 0.6\n"
-    build/node2vec_ms_bias/node2vec_ms_bias  "-i:../graph/${paths} -o:../emb/ls.em" -l:${l} -p:${p} -q:${q}  -r:${r} -rp:0.6 ${flags}
+    build/node2vec_ms_bias/node2vec_ms_bias  -i:../graph/${paths} -o:../emb/ls.em -l:${l} -p:${p} -q:${q}  -r:${r} -rp:0.6 ${flags}
     printf "\n------------------------------------------------"
     printf "\n------------------------------------------------"
     printf "\n------------------------------------------------\n\n\n"
